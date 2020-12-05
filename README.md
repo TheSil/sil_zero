@@ -1,1 +1,3 @@
-# sil_zero
+# SilZero 
+
+Experimenting with AI ideas...
