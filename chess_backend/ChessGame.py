@@ -35,10 +35,6 @@ class ChessGame:
             else:
                 self.state = self.WHITE_WON
 
-
-    def get_actions(self):
-        return legal_moves
-
     def __update_actions(self):
         legal_moves = []
         for file in range(8):
@@ -47,31 +43,3 @@ class ChessGame:
                     moves = self.rules.get_legal_moves(Position(file, rank))
                     legal_moves += moves
         self.actions = legal_moves
-
-
-if __name__ == '__main__':
-
-    rules = ChessRulesDefault()
-    game = ChessGame(rules)
-    game.start_new()
-
-    while True:
-        legal_moves = []
-        for file in range(8):
-            for rank in range(8):
-                if game.rules.state.board[file][rank].player == game.rules.state.turn:
-                    moves = game.rules.get_legal_moves(Position(file, rank))
-                    legal_moves += moves
-
-        i = 0
-        print(game.rules.state)
-        for move in legal_moves:
-            print(f"{i}: {move.move_from} -> {move.move_to}\t\t", end='')
-            i += 1
-            if i % 3 == 0:
-                print("")
-        print("")
-        num = int(input("Choice: "))
-
-        move = legal_moves[num]
-        game.move(move.move_from, move.move_to)
