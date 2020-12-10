@@ -746,6 +746,26 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
             move_to=(6, 0)
         )
 
+class WhiteThreatenTests(unittest.TestCase):
+
+    def test_king_threaten_by_pawn(self):
+        board = prepare_board(config={
+                (6, 0): (PlayerEnum.white, PieceEnum.king),
+                (6, 1): (PlayerEnum.black, PieceEnum.rook),
+                (5, 2): (PlayerEnum.black, PieceEnum.pawn),
+            },
+            turn=PlayerEnum.white)
+
+        legal_moves = board.get_legal_moves(Position(6, 0))
+        expected_legal_moves = [
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(6, 0),
+                                                               Position(5, 0)),
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(6, 0),
+                                                               Position(7, 0)),
+        ]
+
+        self.assertEqual(expected_legal_moves, legal_moves)
+
 
 
 if __name__ == '__main__':

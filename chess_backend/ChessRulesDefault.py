@@ -102,12 +102,14 @@ class ChessRulesDefault:
                 moves = self.__get_legal_moves_queen(pos)
 
         if check:
+            legal_moves = []
             for move in moves:
                 import copy
                 copy = copy.deepcopy(self)
                 copy.do_move(move.move_from, move.move_to, check=False)
-                if copy.__is_king_threaten(from_ref.player):
-                    raise IllegalMoveException
+                if not copy.__is_king_threaten(from_ref.player):
+                    legal_moves.append(move)
+            moves = legal_moves
 
         return moves
 
@@ -160,7 +162,7 @@ class ChessRulesDefault:
         piece = self.state.board[source.file][source.rank].piece
         if piece == PieceEnum.pawn:
             dir = 1 if player == PlayerEnum.white else -1
-            return target.rank == source.rank + 1 and \
+            return target.rank == source.rank + dir and \
                    (target.file == source.file + 1  or target.file == source.file - 1)
         elif piece == PieceEnum.knight:
             dx = target.file - source.file
