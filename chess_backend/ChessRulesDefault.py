@@ -108,7 +108,7 @@ class ChessRulesDefault:
                 import copy
                 copy = copy.deepcopy(self)
                 copy.do_move(move.move_from, move.move_to, check=False)
-                if not copy.__is_king_threaten(from_ref.player):
+                if not copy.is_king_threaten(from_ref.player):
                     legal_moves.append(move)
             moves = legal_moves
 
@@ -251,7 +251,7 @@ class ChessRulesDefault:
                         return True
         return False
 
-    def __is_king_threaten(self, player):
+    def is_king_threaten(self, player):
         for file in range(8):
             for rank in range(8):
                 if self.state.board[file][rank].player == player and \
