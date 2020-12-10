@@ -21,7 +21,8 @@ class ChessRulesDefault:
                 self.to_move = [(pos_from, pos_to)]
 
         def __eq__(self, other) :
-            return self.move_from == other.move_from and self.move_to == other.move_to
+            return isinstance(other, ChessRulesDefault.MoveDefinition) and \
+                   self.move_from == other.move_from and self.move_to == other.move_to
 
     default_pieces = [
         (0, 1, PieceEnum.pawn, PlayerEnum.white),
@@ -192,8 +193,9 @@ class ChessRulesDefault:
             dy = target.rank - source.rank
             if abs(dx) == abs(dy):
                 # check there are no other pieces in way
-                dir_file, dir_rank = target.file - source.file, target.rank - source.rank
-                file, rank = source.file, source.rank
+                dir_file = 1 if target.file - source.file > 0 else -1
+                dir_rank = 1 if target.rank - source.rank > 0 else - 1
+                file, rank = source.file + dir_file, source.rank + dir_rank
                 while file != target.file:
                     if self.state.board[file][rank].player is not None:
                         return False
@@ -206,8 +208,9 @@ class ChessRulesDefault:
             dy = target.rank - source.rank
             if abs(dx) == abs(dy):
                 # check there are no other pieces in way
-                dir_file, dir_rank = target.file - source.file, target.rank - source.rank
-                file, rank = source.file, source.rank
+                dir_file = 1 if target.file - source.file > 0 else -1
+                dir_rank = 1 if target.rank - source.rank > 0 else - 1
+                file, rank = source.file + dir_file, source.rank + dir_rank
                 while file != target.file:
                     if self.state.board[file][rank].player is not None:
                         return False

@@ -746,7 +746,7 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
             move_to=(6, 0)
         )
 
-class WhiteThreatenTests(unittest.TestCase):
+class ThreatenTests(unittest.TestCase):
 
     def test_king_threaten_by_pawn(self):
         board = prepare_board(config={
@@ -764,7 +764,32 @@ class WhiteThreatenTests(unittest.TestCase):
                                                                Position(7, 0)),
         ]
 
-        self.assertEqual(expected_legal_moves, legal_moves)
+        self.assertCountEqual(expected_legal_moves, legal_moves)
+
+    def test_king_threaten_by_bishop(self):
+        board = prepare_board(config={
+                (2, 6): (PlayerEnum.black, PieceEnum.king),
+                (4, 6): (PlayerEnum.white, PieceEnum.bishop)
+            },
+            turn=PlayerEnum.black)
+
+        legal_moves = board.get_legal_moves(Position(2, 6))
+        expected_legal_moves = [
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(2, 6),
+                                                               Position(2, 7)),
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(2, 6),
+                                                               Position(2, 5)),
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(2, 6),
+                                                               Position(1, 5)),
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(2, 6),
+                                                               Position(1, 6)),
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(2, 6),
+                                                               Position(1, 7)),
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(2, 6),
+                                                               Position(3, 6)),
+        ]
+
+        self.assertCountEqual(expected_legal_moves, legal_moves)
 
 
 
