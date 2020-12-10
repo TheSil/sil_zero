@@ -461,6 +461,31 @@ class WhiteKingMoveTests(unittest.TestCase):
             move_to=(1, 1)
         )
 
+    def test_king_move_illegal(self):
+        check_move_is_illegal(self,
+                              prepare_board(config={
+                                  (0, 0): (PlayerEnum.white, PieceEnum.king)
+                              },
+                                  turn=PlayerEnum.white),
+                              move_from=(0, 0),
+                              move_to=(0, 2)
+                              )
+
+    def test_king_move_illegal_in_check(self):
+        board = prepare_board(config={
+            (0, 0): (PlayerEnum.white, PieceEnum.king),
+            (0, 7): (PlayerEnum.black, PieceEnum.queen),
+        },
+            turn=PlayerEnum.white)
+
+        check_move_is_illegal(self,
+                              board,
+                              move_from=(0, 0),
+                              move_to=(0, 1)
+                              )
+
+class WhiteKingQueenSideCastlingTests(unittest.TestCase):
+
     def test_king_castling_queen_side(self):
         board = prepare_board(config={
                 (0, 0): (PlayerEnum.white, PieceEnum.rook),
@@ -502,6 +527,109 @@ class WhiteKingMoveTests(unittest.TestCase):
         board.do_move(Position(4, 0), Position(4, 1))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_queen_side )
+
+    def test_king_castling_queen_side_illegal_when_threaten(self):
+        board = prepare_board(config={
+                (0, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (4, 7): (PlayerEnum.black, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_queen_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(1, 0)
+        )
+
+    def test_king_castling_queen_side_illegal_when_threaten_between(self):
+        board = prepare_board(config={
+                (0, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (3, 7): (PlayerEnum.black, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_queen_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(1, 0)
+        )
+
+        board = prepare_board(config={
+                (0, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (2, 7): (PlayerEnum.black, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_queen_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(1, 0)
+        )
+
+        board = prepare_board(config={
+                (0, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (1, 7): (PlayerEnum.black, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_queen_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(1, 0)
+        )
+
+    def test_king_castling_queen_side_illegal_when_something_between(self):
+        board = prepare_board(config={
+                (0, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (1, 0): (PlayerEnum.white, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_queen_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(1, 0)
+        )
+
+        board = prepare_board(config={
+                (0, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (2, 0): (PlayerEnum.white, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_queen_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(1, 0)
+        )
+
+        board = prepare_board(config={
+                (0, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (3, 0): (PlayerEnum.white, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_queen_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(1, 0)
+        )
+
+class WhiteKingKingSideCastlingTests(unittest.TestCase):
 
     def test_king_castling_king_side(self):
         board = prepare_board(config={
@@ -545,28 +673,79 @@ class WhiteKingMoveTests(unittest.TestCase):
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_king_side )
 
-    def test_king_move_illegal(self):
-        check_move_is_illegal(self,
-                              prepare_board(config={
-                                  (0, 0): (PlayerEnum.white, PieceEnum.king)
-                              },
-                                  turn=PlayerEnum.white),
-                              move_from=(0, 0),
-                              move_to=(0, 2)
-                              )
-
-    def test_king_move_illegal_in_check(self):
+    def test_king_castling_king_side_illegal_when_threaten(self):
         board = prepare_board(config={
-            (0, 0): (PlayerEnum.white, PieceEnum.king),
-            (0, 7): (PlayerEnum.black, PieceEnum.queen),
-        },
+                (7, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (4, 7): (PlayerEnum.black, PieceEnum.queen),
+            },
             turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_king_side = True
 
         check_move_is_illegal(self,
-                              board,
-                              move_from=(0, 0),
-                              move_to=(0, 1)
-                              )
+            board,
+            move_from=(4, 0),
+            move_to=(6, 0)
+        )
+
+    def test_king_castling_king_side_illegal_when_threaten_between(self):
+        board = prepare_board(config={
+                (7, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (5, 7): (PlayerEnum.black, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_king_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(6, 0)
+        )
+
+        board = prepare_board(config={
+                (7, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (6, 7): (PlayerEnum.black, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_king_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(6, 0)
+        )
+
+    def test_king_castling_king_side_illegal_when_something_between(self):
+        board = prepare_board(config={
+                (7, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white, PieceEnum.king),
+                (6, 0): (PlayerEnum.white, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_king_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(6, 0)
+        )
+
+        board = prepare_board(config={
+                (7, 0): (PlayerEnum.white, PieceEnum.rook),
+                (4, 0): (PlayerEnum.white,PieceEnum.king),
+                (5, 0): (PlayerEnum.white, PieceEnum.queen),
+            },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_king_side = True
+
+        check_move_is_illegal(self,
+            board,
+            move_from=(4, 0),
+            move_to=(6, 0)
+        )
+
 
 
 if __name__ == '__main__':
