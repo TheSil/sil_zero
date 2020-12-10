@@ -19,16 +19,15 @@ if __name__ == '__main__':
         print(game.rules.state)
 
         legal_moves = game.actions
-
         if game.rules.state.turn == PlayerEnum.white:
-            num = white.request_move(game.rules.state, legal_moves)
+            selected = white.select_action(game.rules.state, legal_moves)
         else:
-            num = black.request_move(game.rules.state, legal_moves)
+            selected = black.select_action(game.rules.state, legal_moves)
 
-        move = legal_moves[num]
-        print(f"{idx}. move chosen: {move.move_from} -> {move.move_to}")
+        action = legal_moves[selected]
+        print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
+        game.move(selected)
         idx += 1
-        game.move(move.move_from, move.move_to, promote_piece=move.promote_piece)
 
 
     if game.state == game.WHITE_WON:

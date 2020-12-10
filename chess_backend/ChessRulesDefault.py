@@ -1,31 +1,34 @@
 from common import PieceEnum, PlayerEnum, Position, IllegalMoveException
 from BoardState import BoardState
 
+
+class ActionMove:
+    def __init__(self, pos_from, pos_to,
+                 to_move=None,
+                 to_take=None,
+                 is_double_move=False,
+                 is_queen_side_castle=False,
+                 is_king_side_castle=False,
+                 promote_piece=None):
+        self.move_from = pos_from
+        self.move_to = pos_to
+        self.to_move = to_move
+        self.to_take = to_take
+        self.is_double_move = is_double_move
+        self.is_queen_side_castle = is_queen_side_castle
+        self.is_king_side_castle = is_king_side_castle
+        self.promote_piece = promote_piece
+        if self.to_move is None:
+            self.to_move = [(pos_from, pos_to)]
+
+    def __eq__(self, other):
+        # return isinstance(other, ActionMove) and \
+        #        self.move_from == other.move_from and self.move_to == other.move_to
+        return isinstance(other, ActionMove) and \
+            self.__dict__ == other.__dict__
+
+
 class ChessRulesDefault:
-
-    class MoveDefinition:
-        def __init__(self, pos_from, pos_to,
-                     to_move=None,
-                     to_take=None,
-                     is_double_move=False,
-                     is_queen_side_castle=False,
-                     is_king_side_castle=False,
-                     promote_piece=None):
-            self.move_from = pos_from
-            self.move_to = pos_to
-            self.to_move = to_move
-            self.to_take = to_take
-            self.is_double_move = is_double_move
-            self.is_queen_side_castle = is_queen_side_castle
-            self.is_king_side_castle = is_king_side_castle
-            self.promote_piece = promote_piece
-            if self.to_move is None:
-                self.to_move = [(pos_from, pos_to)]
-
-        def __eq__(self, other) :
-            return isinstance(other, ChessRulesDefault.MoveDefinition) and \
-                   self.move_from == other.move_from and self.move_to == other.move_to
-
     default_pieces = [
         (0, 1, PieceEnum.pawn, PlayerEnum.white),
         (1, 1, PieceEnum.pawn, PlayerEnum.white),
@@ -49,7 +52,7 @@ class ChessRulesDefault:
         (3, 6, PieceEnum.pawn, PlayerEnum.black),
         (4, 6, PieceEnum.pawn, PlayerEnum.black),
         (5, 6, PieceEnum.pawn, PlayerEnum.black),
-        (6, 6, PieceEnum.pawn,PlayerEnum.black),
+        (6, 6, PieceEnum.pawn, PlayerEnum.black),
         (7, 6, PieceEnum.pawn, PlayerEnum.black),
         (0, 7, PieceEnum.rook, PlayerEnum.black),
         (1, 7, PieceEnum.knight, PlayerEnum.black),
@@ -59,7 +62,7 @@ class ChessRulesDefault:
         (5, 7, PieceEnum.bishop, PlayerEnum.black),
         (6, 7, PieceEnum.knight, PlayerEnum.black),
         (7, 7, PieceEnum.rook, PlayerEnum.black)
-        ]
+    ]
 
     class SpecificPlayerState:
         def __init__(self):
@@ -109,47 +112,43 @@ class ChessRulesDefault:
             for move in moves:
                 import copy
                 copy = copy.deepcopy(self)
-                copy.do_move(move.move_from, move.move_to, check=False, promote_piece=move.promote_piece)
+                copy.move(move, check=False)
                 if not copy.is_king_threaten(from_ref.player):
                     legal_moves.append(move)
             moves = legal_moves
 
         return moves
 
-    def do_move(self, pos_from, pos_to, check=True, promote_piece=None):
-        legal_moves = self.get_legal_moves(pos_from, check)
-        move_details = None
-        for move in legal_moves:
-            if move.move_to == pos_to and move.promote_piece == promote_piece:
-                move_details = move
-        if move_details is None:
+    def move(self, action, check=True):
+        legal_moves = self.get_legal_moves(action.move_from, check)
+        if action not in legal_moves:
             raise IllegalMoveException
 
-        if move_details.is_king_side_castle:
+        if action.is_king_side_castle:
             self.specific[self.state.turn].can_castle_king_side = False
-        if move_details.is_queen_side_castle:
+        if action.is_queen_side_castle:
             self.specific[self.state.turn].can_castle_queen_side = False
-        if self.state.board[pos_from.file][pos_from.rank].piece == PieceEnum.king:
+        if self.state.board[action.move_from.file][action.move_from.rank].piece == PieceEnum.king:
             self.specific[self.state.turn].can_castle_king_side = False
             self.specific[self.state.turn].can_castle_queen_side = False
-        if self.state.board[pos_from.file][pos_from.rank].piece == PieceEnum.rook:
+        if self.state.board[action.move_from.file][action.move_from.rank].piece == PieceEnum.rook:
             if self.state.turn == PlayerEnum.white:
-                if pos_from.file == 0 and pos_from.rank == 0:
+                if action.move_from.file == 0 and action.move_from.rank == 0:
                     self.specific[self.state.turn].can_castle_queen_side = False
-                if pos_from.file == 7 and pos_from.rank == 0:
+                if action.move_from.file == 7 and action.move_from.rank == 0:
                     self.specific[self.state.turn].can_castle_king_side = False
             elif self.state.turn == PlayerEnum.black:
-                if pos_from.file == 0 and pos_from.rank == 7:
+                if action.move_from.file == 0 and action.move_from.rank == 7:
                     self.specific[self.state.turn].can_castle_queen_side = False
-                if pos_from.file == 7 and pos_from.rank == 7:
+                if action.move_from.file == 7 and action.move_from.rank == 7:
                     self.specific[self.state.turn].can_castle_king_side = False
 
-        if move_details.to_take is not None:
-            ref = self.state.board[move_details.to_take.file][move_details.to_take.rank]
+        if action.to_take is not None:
+            ref = self.state.board[action.to_take.file][action.to_take.rank]
             ref.piece = None
             ref.player = None
 
-        for move in move_details.to_move:
+        for move in action.to_move:
             from_ref = self.state.board[move[0].file][move[0].rank]
             to_ref = self.state.board[move[1].file][move[1].rank]
             to_ref.piece = from_ref.piece
@@ -157,20 +156,20 @@ class ChessRulesDefault:
             from_ref.piece = None
             from_ref.player = None
 
-        if move_details.promote_piece is not None:
-            to_ref = self.state.board[pos_to.file][pos_to.rank]
-            to_ref.piece = move_details.promote_piece
+        if action.promote_piece is not None:
+            to_ref = self.state.board[action.move_to.file][action.move_to.rank]
+            to_ref.piece = action.promote_piece
 
         self.state.turn = PlayerEnum.white if self.state.turn == PlayerEnum.black else PlayerEnum.black
-        self.last_move_double_file = move_details.move_to.file if move_details.is_double_move else None
+        self.last_move_double_file = action.move_to.file if action.is_double_move else None
 
     def __threats(self, source, target):
         player = self.state.board[source.file][source.rank].player
         piece = self.state.board[source.file][source.rank].piece
         if piece == PieceEnum.pawn:
-            dir = 1 if player == PlayerEnum.white else -1
-            return target.rank == source.rank + dir and \
-                   (target.file == source.file + 1  or target.file == source.file - 1)
+            direction = 1 if player == PlayerEnum.white else -1
+            return target.rank == source.rank + direction and \
+                   (target.file == source.file + 1 or target.file == source.file - 1)
         elif piece == PieceEnum.knight:
             dx = target.file - source.file
             dy = target.rank - source.rank
@@ -279,42 +278,41 @@ class ChessRulesDefault:
             return []
 
         moves = []
-        dir = 1 if self.state.turn == PlayerEnum.white else -1
+        direction = 1 if self.state.turn == PlayerEnum.white else -1
         start_rank = 1 if self.state.turn == PlayerEnum.white else 6
         end_rank = 7 if self.state.turn == PlayerEnum.white else 0
         if pos.rank != end_rank:
-            move_pos = Position(pos.file, pos.rank + dir)
+            move_pos = Position(pos.file, pos.rank + direction)
             if self.state.board[move_pos.file][move_pos.rank].piece is None:
-                if pos.rank == end_rank - dir:
+                if pos.rank == end_rank - direction:
                     # about to promote
-                    moves.append(self.MoveDefinition(pos, move_pos, promote_piece=PieceEnum.knight))
-                    moves.append(self.MoveDefinition(pos, move_pos, promote_piece=PieceEnum.bishop))
-                    moves.append(self.MoveDefinition(pos, move_pos, promote_piece=PieceEnum.rook))
-                    moves.append(self.MoveDefinition(pos, move_pos, promote_piece=PieceEnum.queen))
+                    moves.append(ActionMove(pos, move_pos, promote_piece=PieceEnum.knight))
+                    moves.append(ActionMove(pos, move_pos, promote_piece=PieceEnum.bishop))
+                    moves.append(ActionMove(pos, move_pos, promote_piece=PieceEnum.rook))
+                    moves.append(ActionMove(pos, move_pos, promote_piece=PieceEnum.queen))
                 else:
-                    moves.append(self.MoveDefinition(pos,
-                                                     move_pos))
+                    moves.append(ActionMove(pos,
+                                            move_pos))
                     if pos.rank == start_rank:
-                        move_pos = Position(pos.file, pos.rank + 2 * dir)
+                        move_pos = Position(pos.file, pos.rank + 2 * direction)
                         if self.state.board[move_pos.file][move_pos.rank].piece is None:
-                            moves.append(self.MoveDefinition(pos,
-                                                             move_pos,
-                                                             is_double_move=True))
+                            moves.append(ActionMove(pos,
+                                                    move_pos,
+                                                    is_double_move=True))
             for side in (-1, 1):
-                take_pos = Position(pos.file + side, pos.rank + dir)
+                take_pos = Position(pos.file + side, pos.rank + direction)
                 if 0 <= take_pos.file < 8:
                     if self.state.board[take_pos.file][take_pos.rank].player is not None and \
                             self.state.board[take_pos.file][take_pos.rank].player != ref.player:
-                        moves.append(self.MoveDefinition(pos,
-                                                         take_pos,
-                                                         to_take=take_pos))
+                        moves.append(ActionMove(pos,
+                                                take_pos,
+                                                to_take=take_pos))
                     if self.state.board[take_pos.file][take_pos.rank].player is None and \
-                        self.last_move_double_file == take_pos.file:
+                            self.last_move_double_file == take_pos.file:
                         # en passant
-                        moves.append(self.MoveDefinition(pos,
-                                                         take_pos,
-                                                         to_take=Position(take_pos.file, pos.rank), ))
-
+                        moves.append(ActionMove(pos,
+                                                take_pos,
+                                                to_take=Position(take_pos.file, pos.rank), ))
 
         return moves
 
@@ -322,90 +320,89 @@ class ChessRulesDefault:
         moves = []
         player = self.state.board[pos.file][pos.rank].player
         enemy = PlayerEnum.white if player == PlayerEnum.black else PlayerEnum.black
-        for dir in ((1,1),(-1,1),(1,-1),(-1,-1),(-1,0),(1,0),(0,-1),(0,1)):
+        for dir in ((1, 1), (-1, 1), (1, -1), (-1, -1), (-1, 0), (1, 0), (0, -1), (0, 1)):
             for move_pos in self.__enmurate_positions_in_direction(pos, dir):
                 if self.state.board[move_pos.file][move_pos.rank].player is not None:
                     if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
-                        moves.append(self.MoveDefinition(pos, move_pos, to_take=move_pos))
+                        moves.append(ActionMove(pos, move_pos, to_take=move_pos))
                 else:
-                    moves.append(self.MoveDefinition(pos, move_pos))
+                    moves.append(ActionMove(pos, move_pos))
                 break
         # castling
         if self.specific[self.state.turn].can_castle_queen_side:
             if not self.__is_position_threaten(Position(2, pos.rank), enemy) and \
-               not self.__is_position_threaten(Position(3, pos.rank), enemy) and \
-               not self.__is_position_threaten(Position(4, pos.rank), enemy) and \
+                    not self.__is_position_threaten(Position(3, pos.rank), enemy) and \
+                    not self.__is_position_threaten(Position(4, pos.rank), enemy) and \
                     self.state.board[1][pos.rank].player is None and \
                     self.state.board[2][pos.rank].player is None and \
                     self.state.board[3][pos.rank].player is None:
-                    moves.append(self.MoveDefinition(pos,
-                                             Position(1, pos.rank),
-                                             to_move=[(pos, Position(1, pos.rank)),
-                                                   (Position(0, pos.rank), Position(2, pos.rank))
-                                                   ],
-                                             is_queen_side_castle=True)
-                         )
+                moves.append(ActionMove(pos,
+                                        Position(1, pos.rank),
+                                        to_move=[(pos, Position(1, pos.rank)),
+                                                     (Position(0, pos.rank), Position(2, pos.rank))
+                                                     ],
+                                        is_queen_side_castle=True)
+                             )
 
         if self.specific[self.state.turn].can_castle_king_side:
             if not self.__is_position_threaten(Position(4, pos.rank), enemy) and \
-               not self.__is_position_threaten(Position(5, pos.rank), enemy) and \
-                    self.state.board[5][pos.rank].player is None and\
+                    not self.__is_position_threaten(Position(5, pos.rank), enemy) and \
+                    self.state.board[5][pos.rank].player is None and \
                     self.state.board[6][pos.rank].player is None:
-
-                moves.append(self.MoveDefinition(pos,
-                                                 Position(6, pos.rank),
-                                                 to_move=[(pos, Position(6, pos.rank)),
-                                                       (Position(7, pos.rank), Position(5, pos.rank))
-                                                       ],
-                                                 is_king_side_castle=True)
-                         )
+                moves.append(ActionMove(pos,
+                                        Position(6, pos.rank),
+                                        to_move=[(pos, Position(6, pos.rank)),
+                                                     (Position(7, pos.rank), Position(5, pos.rank))
+                                                     ],
+                                        is_king_side_castle=True)
+                             )
 
         return moves
 
     def __get_legal_moves_bishop(self, pos):
         moves = []
-        for dir in ((1,1),(-1,1),(1,-1),(-1,-1)):
-            for move_pos in self.__enmurate_positions_in_direction(pos, dir):
+        for direction in ((1, 1), (-1, 1), (1, -1), (-1, -1)):
+            for move_pos in self.__enmurate_positions_in_direction(pos, direction):
                 if self.state.board[move_pos.file][move_pos.rank].player is not None:
                     if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
-                        moves.append(self.MoveDefinition(pos, move_pos, to_take=move_pos))
+                        moves.append(ActionMove(pos, move_pos, to_take=move_pos))
                     break
-                moves.append(self.MoveDefinition(pos, move_pos))
+                moves.append(ActionMove(pos, move_pos))
         return moves
 
     def __get_legal_moves_rook(self, pos):
         moves = []
-        for dir in ((-1,0),(1,0),(0,-1),(0,1)):
-            for move_pos in self.__enmurate_positions_in_direction(pos, dir):
+        for direction in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            for move_pos in self.__enmurate_positions_in_direction(pos, direction):
                 if self.state.board[move_pos.file][move_pos.rank].player is not None:
                     if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
-                        moves.append(self.MoveDefinition(pos, move_pos, to_take=move_pos))
+                        moves.append(ActionMove(pos, move_pos, to_take=move_pos))
                     break
-                moves.append(self.MoveDefinition(pos, move_pos))
+                moves.append(ActionMove(pos, move_pos))
         return moves
 
     def __get_legal_moves_knight(self, pos):
         moves = []
-        for offset in ((2,1),(1,2),(-2,1),(2,-1),(-2,-1),(-1,2),(1,-2),(-1,-2)):
+        for offset in ((2, 1), (1, 2), (-2, 1), (2, -1), (-2, -1), (-1, 2), (1, -2), (-1, -2)):
             move_pos = Position(pos.file + offset[0], pos.rank + offset[1])
             if 0 <= move_pos.file < 8 and 0 <= move_pos.rank < 8:
                 if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
                     to_take = None
                     if self.state.board[move_pos.file][move_pos.rank].player is not None:
                         to_take = move_pos
-                    moves.append(self.MoveDefinition(pos,
-                                                     move_pos,
-                                                     to_take=to_take))
+                    moves.append(ActionMove(pos,
+                                            move_pos,
+                                            to_take=to_take))
 
         return moves
 
     def __get_legal_moves_queen(self, pos):
         moves = []
-        for dir in ((1,1),(-1,1),(1,-1),(-1,-1),(-1,0),(1,0),(0,-1),(0,1)):
-            for move_pos in self.__enmurate_positions_in_direction(pos, dir):
+        for direction in ((1, 1), (-1, 1), (1, -1), (-1, -1), (-1, 0), (1, 0), (0, -1), (0, 1)):
+            for move_pos in self.__enmurate_positions_in_direction(pos, direction):
                 if self.state.board[move_pos.file][move_pos.rank].player is not None:
                     if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
-                        moves.append(self.MoveDefinition(pos, move_pos, to_take=move_pos))
+                        moves.append(ActionMove(pos, move_pos, to_take=move_pos))
                     break
-                moves.append(self.MoveDefinition(pos, move_pos))
+                moves.append(ActionMove(pos, move_pos))
         return moves

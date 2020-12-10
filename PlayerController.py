@@ -1,8 +1,8 @@
 
 class PlayerController:
-    def request_move(self, state, moves):
+    def select_action(self, state, actions):
         i = 0
-        for move in moves:
+        for move in actions:
             print(f"{i}: {move.move_from} -> {move.move_to} {move.promote_piece.name if move.promote_piece is not None else ''}\t\t", end='')
             i += 1
             if i % 3 == 0:
