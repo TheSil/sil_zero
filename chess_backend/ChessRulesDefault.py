@@ -239,7 +239,7 @@ class ChessRulesDefault:
         elif piece == PieceEnum.king:
             dx = target.file - source.file
             dy = target.rank - source.rank
-            return abs(dx) + abs(dy) == 1
+            return max(abs(dx), abs(dy)) == 1
 
         return False
 

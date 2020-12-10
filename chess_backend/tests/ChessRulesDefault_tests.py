@@ -791,6 +791,23 @@ class ThreatenTests(unittest.TestCase):
 
         self.assertCountEqual(expected_legal_moves, legal_moves)
 
+    def test_king_threaten_by_king(self):
+        board = prepare_board(config={
+                (3, 7): (PlayerEnum.white, PieceEnum.king),
+                (3, 5): (PlayerEnum.black, PieceEnum.king)
+            },
+            turn=PlayerEnum.white)
+
+        legal_moves = board.get_legal_moves(Position(3, 7))
+        expected_legal_moves = [
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(3, 7),
+                                                               Position(2, 7)),
+            ChessRulesDefault.ChessRulesDefault.MoveDefinition(Position(3, 7),
+                                                               Position(4, 7)),
+        ]
+
+        self.assertCountEqual(expected_legal_moves, legal_moves)
+
 
 
 if __name__ == '__main__':
