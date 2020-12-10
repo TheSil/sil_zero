@@ -3,18 +3,16 @@ class PositionState:
         self.piece = piece
         self.player = player
 
+    def __str__(self):
+        return f"{self.piece.name} ({self.player.name})"
+
 class BoardState:
     def __init__(self):
-        self.turn = None
-        self.placed_pieces = []
-        self.board = [[PositionState() for i in range(8)] for i in range(8)]
+        self.clear_board()
 
     def clear_board(self):
-        pass
-
-    def place_piece(self, piece, position, player):
-        self.board[position.file][position.rank].piece = piece
-        self.board[position.file][position.rank].player = player
+        self.turn = None
+        self.board = [[PositionState() for i in range(8)] for i in range(8)]
 
     def __str__(self):
         ret = ""

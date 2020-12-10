@@ -3,7 +3,7 @@ from BoardState import BoardState
 
 class ChessRulesDefault:
 
-    class MoveDetails:
+    class MoveDefinition:
         def __init__(self, pos_from, pos_to,
                      to_move=None,
                      to_take=None,
@@ -24,38 +24,38 @@ class ChessRulesDefault:
             return self.move_from == other.move_from and self.move_to == other.move_to
 
     default_pieces = [
-        (PieceEnum.pawn, 0, 1, PlayerEnum.white),
-        (PieceEnum.pawn, 1, 1, PlayerEnum.white),
-        (PieceEnum.pawn, 2, 1, PlayerEnum.white),
-        (PieceEnum.pawn, 3, 1, PlayerEnum.white),
-        (PieceEnum.pawn, 4, 1, PlayerEnum.white),
-        (PieceEnum.pawn, 5, 1, PlayerEnum.white),
-        (PieceEnum.pawn, 6, 1, PlayerEnum.white),
-        (PieceEnum.pawn, 7, 1, PlayerEnum.white),
-        (PieceEnum.rook, 0, 0, PlayerEnum.white),
-        (PieceEnum.knight, 1, 0, PlayerEnum.white),
-        (PieceEnum.bishop, 2, 0, PlayerEnum.white),
-        (PieceEnum.queen, 3, 0, PlayerEnum.white),
-        (PieceEnum.king, 4, 0, PlayerEnum.white),
-        (PieceEnum.bishop, 5, 0, PlayerEnum.white),
-        (PieceEnum.knight, 6, 0, PlayerEnum.white),
-        (PieceEnum.rook, 7, 0, PlayerEnum.white),
-        (PieceEnum.pawn, 0, 6, PlayerEnum.black),
-        (PieceEnum.pawn, 1, 6, PlayerEnum.black),
-        (PieceEnum.pawn, 2, 6, PlayerEnum.black),
-        (PieceEnum.pawn, 3, 6, PlayerEnum.black),
-        (PieceEnum.pawn, 4, 6, PlayerEnum.black),
-        (PieceEnum.pawn, 5, 6, PlayerEnum.black),
-        (PieceEnum.pawn, 6, 6, PlayerEnum.black),
-        (PieceEnum.pawn, 7, 6, PlayerEnum.black),
-        (PieceEnum.rook, 0, 7, PlayerEnum.black),
-        (PieceEnum.knight, 1, 7, PlayerEnum.black),
-        (PieceEnum.bishop, 2, 7, PlayerEnum.black),
-        (PieceEnum.queen, 3, 7, PlayerEnum.black),
-        (PieceEnum.king, 4, 7, PlayerEnum.black),
-        (PieceEnum.bishop, 5, 7, PlayerEnum.black),
-        (PieceEnum.knight, 6, 7, PlayerEnum.black),
-        (PieceEnum.rook, 7, 7, PlayerEnum.black)
+        (0, 1, PieceEnum.pawn, PlayerEnum.white),
+        (1, 1, PieceEnum.pawn, PlayerEnum.white),
+        (2, 1, PieceEnum.pawn, PlayerEnum.white),
+        (3, 1, PieceEnum.pawn, PlayerEnum.white),
+        (4, 1, PieceEnum.pawn, PlayerEnum.white),
+        (5, 1, PieceEnum.pawn, PlayerEnum.white),
+        (6, 1, PieceEnum.pawn, PlayerEnum.white),
+        (7, 1, PieceEnum.pawn, PlayerEnum.white),
+        (0, 0, PieceEnum.rook, PlayerEnum.white),
+        (1, 0, PieceEnum.knight, PlayerEnum.white),
+        (2, 0, PieceEnum.bishop, PlayerEnum.white),
+        (3, 0, PieceEnum.queen, PlayerEnum.white),
+        (4, 0, PieceEnum.king, PlayerEnum.white),
+        (5, 0, PieceEnum.bishop, PlayerEnum.white),
+        (6, 0, PieceEnum.knight, PlayerEnum.white),
+        (7, 0, PieceEnum.rook, PlayerEnum.white),
+        (0, 6, PieceEnum.pawn, PlayerEnum.black),
+        (1, 6, PieceEnum.pawn, PlayerEnum.black),
+        (2, 6, PieceEnum.pawn, PlayerEnum.black),
+        (3, 6, PieceEnum.pawn, PlayerEnum.black),
+        (4, 6, PieceEnum.pawn, PlayerEnum.black),
+        (5, 6, PieceEnum.pawn, PlayerEnum.black),
+        (6, 6, PieceEnum.pawn,PlayerEnum.black),
+        (7, 6, PieceEnum.pawn, PlayerEnum.black),
+        (0, 7, PieceEnum.rook, PlayerEnum.black),
+        (1, 7, PieceEnum.knight, PlayerEnum.black),
+        (2, 7, PieceEnum.bishop, PlayerEnum.black),
+        (3, 7, PieceEnum.queen, PlayerEnum.black),
+        (4, 7, PieceEnum.king, PlayerEnum.black),
+        (5, 7, PieceEnum.bishop, PlayerEnum.black),
+        (6, 7, PieceEnum.knight, PlayerEnum.black),
+        (7, 7, PieceEnum.rook, PlayerEnum.black)
         ]
 
     class SpecificPlayerState:
@@ -72,16 +72,15 @@ class ChessRulesDefault:
         self.specific[PlayerEnum.black] = self.SpecificPlayerState()
 
     def setup_board(self):
-        self.state.turn = PlayerEnum.white
         self.state.clear_board()
+        self.state.turn = PlayerEnum.white
         self.specific[PlayerEnum.white].can_castle_queen_side = True
         self.specific[PlayerEnum.white].can_castle_king_side = True
         self.specific[PlayerEnum.black].can_castle_queen_side = True
         self.specific[PlayerEnum.black].can_castle_king_side = True
         for definition in self.default_pieces:
-            self.state.place_piece(definition[0],
-                                   Position(definition[1], definition[2]),
-                                   definition[3])
+            self.state.board[definition[0]][definition[1]].piece = definition[2]
+            self.state.board[definition[0]][definition[1]].player = definition[3]
 
     def get_legal_moves(self, pos):
         from_ref = self.state.board[pos.file][pos.rank]
@@ -166,28 +165,28 @@ class ChessRulesDefault:
         if pos.rank != end_rank:
             move_pos = Position(pos.file, pos.rank + dir)
             if self.state.board[move_pos.file][move_pos.rank].piece is None:
-                moves.append(self.MoveDetails(pos,
-                                              move_pos))
+                moves.append(self.MoveDefinition(pos,
+                                                 move_pos))
                 if pos.rank == start_rank:
                     move_pos = Position(pos.file, pos.rank + 2 * dir)
                     if self.state.board[move_pos.file][move_pos.rank].piece is None:
-                        moves.append(self.MoveDetails(pos,
-                                                      move_pos,
-                                                      is_double_move=True))
+                        moves.append(self.MoveDefinition(pos,
+                                                         move_pos,
+                                                         is_double_move=True))
             for side in (-1, 1):
                 take_pos = Position(pos.file + side, pos.rank + dir)
                 if 0 <= take_pos.file < 8:
                     if self.state.board[take_pos.file][take_pos.rank].player is not None and \
                             self.state.board[take_pos.file][take_pos.rank].player != ref.player:
-                        moves.append(self.MoveDetails(pos,
-                                                      take_pos,
-                                                      to_take=take_pos))
+                        moves.append(self.MoveDefinition(pos,
+                                                         take_pos,
+                                                         to_take=take_pos))
                     if self.state.board[take_pos.file][take_pos.rank].player is None and \
                         self.last_move_double_file == take_pos.file:
                         # en passant
-                        moves.append(self.MoveDetails(pos,
-                                                      take_pos,
-                                                      to_take=Position(take_pos.file, pos.rank),))
+                        moves.append(self.MoveDefinition(pos,
+                                                         take_pos,
+                                                         to_take=Position(take_pos.file, pos.rank), ))
 
         return moves
 
@@ -197,27 +196,27 @@ class ChessRulesDefault:
             for move_pos in self.__enmurate_positions_in_direction(pos, dir):
                 if self.state.board[move_pos.file][move_pos.rank].player is not None:
                     if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
-                        moves.append(self.MoveDetails(pos, move_pos, to_take=move_pos))
+                        moves.append(self.MoveDefinition(pos, move_pos, to_take=move_pos))
                 else:
-                    moves.append(self.MoveDetails(pos, move_pos))
+                    moves.append(self.MoveDefinition(pos, move_pos))
                 break
         # castling
         if self.specific[self.state.turn].can_castle_queen_side:
-            moves.append(self.MoveDetails(pos,
-                                          Position(1, pos.rank),
-                                          to_move=[(pos, Position(1, pos.rank)),
+            moves.append(self.MoveDefinition(pos,
+                                             Position(1, pos.rank),
+                                             to_move=[(pos, Position(1, pos.rank)),
                                                    (Position(0, pos.rank), Position(2, pos.rank))
                                                    ],
-                                          is_queen_side_castle=True)
+                                             is_queen_side_castle=True)
                          )
 
         if self.specific[self.state.turn].can_castle_king_side:
-            moves.append(self.MoveDetails(pos,
-                                          Position(6, pos.rank),
-                                          to_move=[(pos, Position(6, pos.rank)),
+            moves.append(self.MoveDefinition(pos,
+                                             Position(6, pos.rank),
+                                             to_move=[(pos, Position(6, pos.rank)),
                                                    (Position(7, pos.rank), Position(5, pos.rank))
                                                    ],
-                                          is_king_side_castle=True)
+                                             is_king_side_castle=True)
                          )
 
         return moves
@@ -228,9 +227,9 @@ class ChessRulesDefault:
             for move_pos in self.__enmurate_positions_in_direction(pos, dir):
                 if self.state.board[move_pos.file][move_pos.rank].player is not None:
                     if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
-                        moves.append(self.MoveDetails(pos, move_pos, to_take=move_pos))
+                        moves.append(self.MoveDefinition(pos, move_pos, to_take=move_pos))
                     break
-                moves.append(self.MoveDetails(pos, move_pos))
+                moves.append(self.MoveDefinition(pos, move_pos))
         return moves
 
     def __get_legal_moves_rook(self, pos):
@@ -239,9 +238,9 @@ class ChessRulesDefault:
             for move_pos in self.__enmurate_positions_in_direction(pos, dir):
                 if self.state.board[move_pos.file][move_pos.rank].player is not None:
                     if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
-                        moves.append(self.MoveDetails(pos, move_pos, to_take=move_pos))
+                        moves.append(self.MoveDefinition(pos, move_pos, to_take=move_pos))
                     break
-                moves.append(self.MoveDetails(pos, move_pos))
+                moves.append(self.MoveDefinition(pos, move_pos))
         return moves
 
     def __get_legal_moves_knight(self, pos):
@@ -253,9 +252,9 @@ class ChessRulesDefault:
                     to_take = None
                     if self.state.board[move_pos.file][move_pos.rank].player is not None:
                         to_take = move_pos
-                    moves.append(self.MoveDetails(pos,
-                                                  move_pos,
-                                                  to_take=to_take))
+                    moves.append(self.MoveDefinition(pos,
+                                                     move_pos,
+                                                     to_take=to_take))
 
         return moves
 
@@ -265,7 +264,7 @@ class ChessRulesDefault:
             for move_pos in self.__enmurate_positions_in_direction(pos, dir):
                 if self.state.board[move_pos.file][move_pos.rank].player is not None:
                     if self.state.board[move_pos.file][move_pos.rank].player != self.state.turn:
-                        moves.append(self.MoveDetails(pos, move_pos, to_take=move_pos))
+                        moves.append(self.MoveDefinition(pos, move_pos, to_take=move_pos))
                     break
-                moves.append(self.MoveDetails(pos, move_pos))
+                moves.append(self.MoveDefinition(pos, move_pos))
         return moves
