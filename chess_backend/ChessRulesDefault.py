@@ -82,41 +82,43 @@ class ChessRulesDefault:
             self.state.board[definition[0]][definition[1]].piece = definition[2]
             self.state.board[definition[0]][definition[1]].player = definition[3]
 
-    def get_legal_moves(self, pos):
+    def get_legal_moves(self, pos, check=True):
         from_ref = self.state.board[pos.file][pos.rank]
 
+        moves = []
         if from_ref.player == self.state.turn and from_ref.piece is not None:
             piece = self.state.board[pos.file][pos.rank].piece
             if piece == PieceEnum.pawn:
-                return self.__get_legal_moves_pawn(pos)
+                moves = self.__get_legal_moves_pawn(pos)
             elif piece == PieceEnum.king:
-                return self.__get_legal_moves_king(pos)
+                moves = self.__get_legal_moves_king(pos)
             elif piece == PieceEnum.bishop:
-                return self.__get_legal_moves_bishop(pos)
+                moves = self.__get_legal_moves_bishop(pos)
             elif piece == PieceEnum.rook:
-                return self.__get_legal_moves_rook(pos)
+                moves = self.__get_legal_moves_rook(pos)
             elif piece == PieceEnum.knight:
-                return self.__get_legal_moves_knight(pos)
+                moves = self.__get_legal_moves_knight(pos)
             elif piece == PieceEnum.queen:
-                return self.__get_legal_moves_queen(pos)
+                moves = self.__get_legal_moves_queen(pos)
 
-        return []
+        if check:
+            for move in moves:
+                import copy
+                copy = copy.deepcopy(self)
+                copy.do_move(move.move_from, move.move_to, check=False)
+                if copy.__is_king_threaten(from_ref.player):
+                    raise IllegalMoveException
+
+        return moves
 
     def do_move(self, pos_from, pos_to, check=True):
-        legal_moves = self.get_legal_moves(pos_from)
+        legal_moves = self.get_legal_moves(pos_from, check)
         move_details = None
         for move in legal_moves:
             if move.move_to == pos_to:
                 move_details = move
         if move_details is None:
             raise IllegalMoveException
-
-        if check:
-            import copy
-            copy = copy.deepcopy(self)
-            copy.do_move(pos_from, pos_to, check=False)
-            if copy.__is_king_threaten(self.state.board[pos_from.file][pos_from.rank].player):
-                raise IllegalMoveException
 
         if move_details.is_king_side_castle:
             self.specific[self.state.turn].can_castle_king_side = False
