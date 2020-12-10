@@ -1,6 +1,7 @@
 from ChessRulesDefault import ChessRulesDefault
 from common import Position, PlayerEnum
-import random
+from PlayerController import PlayerController
+from RandomAiController import RandomAiController
 
 class ChessGame:
     def __init__(self, rules):
@@ -22,6 +23,9 @@ if __name__ == '__main__':
     game = ChessGame(rules)
     game.start_new()
 
+    white = PlayerController()
+    black = RandomAiController()
+
     while True:
         legal_moves = []
         for file in range(8):
@@ -33,20 +37,12 @@ if __name__ == '__main__':
         if not legal_moves:
             break
 
-        i = 0
         print(game.rules.state)
 
         if game.rules.state.turn == PlayerEnum.white:
-            for move in legal_moves:
-                print(f"{i}: {move.move_from} -> {move.move_to}\t\t", end='')
-                i += 1
-                if i % 3 == 0:
-                    print("")
-            print("")
-            num = int(input("Choice: "))
+            num = white.request_move(game.rules.state, legal_moves)
         else:
-            # random AI
-            num = random.randint(0, len(legal_moves) - 1)
+            num = black.request_move(game.rules.state, legal_moves)
 
         move = legal_moves[num]
         print(f"chosen: {move.move_from} -> {move.move_to}")
