@@ -28,7 +28,7 @@ if __name__ == '__main__':
         move = legal_moves[num]
         print(f"{idx}. move chosen: {move.move_from} -> {move.move_to}")
         idx += 1
-        game.move(move.move_from, move.move_to)
+        game.move(move.move_from, move.move_to, promote_piece=move.promote_piece)
 
 
     if game.state == game.WHITE_WON:

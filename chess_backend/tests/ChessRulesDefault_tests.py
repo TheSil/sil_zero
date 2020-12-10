@@ -221,6 +221,57 @@ class WhitePawnMoveTests(unittest.TestCase):
             move_to=(3, 5)
         )
 
+class WhitePawnPromotionTests(unittest.TestCase):
+
+    def test_promote_pawn(self):
+
+        for promoted_piece in (PieceEnum.queen, PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook):
+
+            board = prepare_board(config={
+                (0, 6): (PlayerEnum.white, PieceEnum.pawn)
+            },
+                turn=PlayerEnum.white
+            )
+
+            board.do_move(pos_from=Position(0,6),
+                          pos_to=Position(0,7),
+                          promote_piece=promoted_piece)
+
+            self.assertEqual(None, board.state.board[0][6].piece)
+            self.assertEqual(None, board.state.board[0][6].player)
+            self.assertEqual(promoted_piece, board.state.board[0][7].piece)
+            self.assertEqual(PlayerEnum.white, board.state.board[0][7].player)
+
+
+    def test_promote_blocked_illegal(self):
+        for promoted_piece in (PieceEnum.queen, PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook):
+            board = prepare_board(config={
+                (0, 6): (PlayerEnum.white, PieceEnum.pawn),
+                (0, 7): (PlayerEnum.black, PieceEnum.queen)
+            },
+                turn=PlayerEnum.white
+            )
+
+            with self.assertRaises(IllegalMoveException):
+                board.do_move(pos_from=Position(0, 6),
+                              pos_to=Position(0, 7),
+                              promote_piece=promoted_piece)
+
+    def test_promote_causing_check_illegal(self):
+        for promoted_piece in (PieceEnum.queen, PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook):
+            board = prepare_board(config={
+                (4, 6): (PlayerEnum.white, PieceEnum.pawn),
+                (7, 6): (PlayerEnum.white, PieceEnum.king),
+                (0, 6): (PlayerEnum.black, PieceEnum.queen),
+            },
+                turn=PlayerEnum.white
+            )
+
+            with self.assertRaises(IllegalMoveException):
+                board.do_move(pos_from=Position(4, 6),
+                              pos_to=Position(4, 7),
+                              promote_piece=promoted_piece)
+
 
 class WhiteRookMoveTests(unittest.TestCase):
 

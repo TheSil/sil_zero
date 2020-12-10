@@ -19,11 +19,11 @@ class ChessGame:
         self.__update_actions()
         self.state = self.RUNNING
 
-    def move(self, pos_from, pos_to):
+    def move(self, pos_from, pos_to, promote_piece):
         if self.state != self.RUNNING:
             return
 
-        self.rules.do_move(pos_from, pos_to)
+        self.rules.do_move(pos_from, pos_to, promote_piece=promote_piece)
         self.__update_actions()
 
         if not self.actions:

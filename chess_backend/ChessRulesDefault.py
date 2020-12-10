@@ -9,7 +9,8 @@ class ChessRulesDefault:
                      to_take=None,
                      is_double_move=False,
                      is_queen_side_castle=False,
-                     is_king_side_castle=False):
+                     is_king_side_castle=False,
+                     promote_piece=None):
             self.move_from = pos_from
             self.move_to = pos_to
             self.to_move = to_move
@@ -17,6 +18,7 @@ class ChessRulesDefault:
             self.is_double_move = is_double_move
             self.is_queen_side_castle = is_queen_side_castle
             self.is_king_side_castle = is_king_side_castle
+            self.promote_piece = promote_piece
             if self.to_move is None:
                 self.to_move = [(pos_from, pos_to)]
 
@@ -107,18 +109,18 @@ class ChessRulesDefault:
             for move in moves:
                 import copy
                 copy = copy.deepcopy(self)
-                copy.do_move(move.move_from, move.move_to, check=False)
+                copy.do_move(move.move_from, move.move_to, check=False, promote_piece=move.promote_piece)
                 if not copy.is_king_threaten(from_ref.player):
                     legal_moves.append(move)
             moves = legal_moves
 
         return moves
 
-    def do_move(self, pos_from, pos_to, check=True):
+    def do_move(self, pos_from, pos_to, check=True, promote_piece=None):
         legal_moves = self.get_legal_moves(pos_from, check)
         move_details = None
         for move in legal_moves:
-            if move.move_to == pos_to:
+            if move.move_to == pos_to and move.promote_piece == promote_piece:
                 move_details = move
         if move_details is None:
             raise IllegalMoveException
@@ -154,6 +156,10 @@ class ChessRulesDefault:
             to_ref.player = from_ref.player
             from_ref.piece = None
             from_ref.player = None
+
+        if move_details.promote_piece is not None:
+            to_ref = self.state.board[pos_to.file][pos_to.rank]
+            to_ref.piece = move_details.promote_piece
 
         self.state.turn = PlayerEnum.white if self.state.turn == PlayerEnum.black else PlayerEnum.black
         self.last_move_double_file = move_details.move_to.file if move_details.is_double_move else None
@@ -279,14 +285,21 @@ class ChessRulesDefault:
         if pos.rank != end_rank:
             move_pos = Position(pos.file, pos.rank + dir)
             if self.state.board[move_pos.file][move_pos.rank].piece is None:
-                moves.append(self.MoveDefinition(pos,
-                                                 move_pos))
-                if pos.rank == start_rank:
-                    move_pos = Position(pos.file, pos.rank + 2 * dir)
-                    if self.state.board[move_pos.file][move_pos.rank].piece is None:
-                        moves.append(self.MoveDefinition(pos,
-                                                         move_pos,
-                                                         is_double_move=True))
+                if pos.rank == end_rank - dir:
+                    # about to promote
+                    moves.append(self.MoveDefinition(pos, move_pos, promote_piece=PieceEnum.knight))
+                    moves.append(self.MoveDefinition(pos, move_pos, promote_piece=PieceEnum.bishop))
+                    moves.append(self.MoveDefinition(pos, move_pos, promote_piece=PieceEnum.rook))
+                    moves.append(self.MoveDefinition(pos, move_pos, promote_piece=PieceEnum.queen))
+                else:
+                    moves.append(self.MoveDefinition(pos,
+                                                     move_pos))
+                    if pos.rank == start_rank:
+                        move_pos = Position(pos.file, pos.rank + 2 * dir)
+                        if self.state.board[move_pos.file][move_pos.rank].piece is None:
+                            moves.append(self.MoveDefinition(pos,
+                                                             move_pos,
+                                                             is_double_move=True))
             for side in (-1, 1):
                 take_pos = Position(pos.file + side, pos.rank + dir)
                 if 0 <= take_pos.file < 8:
@@ -301,6 +314,7 @@ class ChessRulesDefault:
                         moves.append(self.MoveDefinition(pos,
                                                          take_pos,
                                                          to_take=Position(take_pos.file, pos.rank), ))
+
 
         return moves
 
