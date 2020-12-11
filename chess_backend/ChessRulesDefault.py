@@ -1,8 +1,20 @@
 from common import PieceEnum, PlayerEnum, Position, IllegalMoveException
 from BoardState import BoardState
+import copy
 
 
 class ActionMove:
+
+    class Cache:
+        def __init__(self):
+            self.last_move_double_file = None
+            self.unpromote_position = None
+            self.revert_move = []
+            self.to_untake = None
+            self.can_castle_king_side = None
+            self.can_castle_queen_side = None
+            self.turn = None
+
     def __init__(self, pos_from, pos_to,
                  to_move=None,
                  to_take=None,
@@ -26,6 +38,82 @@ class ActionMove:
         #        self.move_from == other.move_from and self.move_to == other.move_to
         return isinstance(other, ActionMove) and \
             self.__dict__ == other.__dict__
+
+    def apply(self, state, cache=None):
+        if cache:
+            state.specific[state.state.turn].can_castle_king_side = cache.can_castle_king_side
+            state.specific[state.state.turn].can_castle_queen_side = cache.can_castle_queen_side
+
+        if self.is_king_side_castle:
+            state.specific[state.state.turn].can_castle_king_side = False
+        if self.is_queen_side_castle:
+            state.specific[state.state.turn].can_castle_queen_side = False
+        if state.state.board[self.move_from.file][self.move_from.rank].piece == PieceEnum.king:
+            state.specific[state.state.turn].can_castle_king_side = False
+            state.specific[state.state.turn].can_castle_queen_side = False
+        if state.state.board[self.move_from.file][self.move_from.rank].piece == PieceEnum.rook:
+            if state.state.turn == PlayerEnum.white:
+                if self.move_from.file == 0 and self.move_from.rank == 0:
+                    state.specific[state.state.turn].can_castle_queen_side = False
+                if self.move_from.file == 7 and self.move_from.rank == 0:
+                    state.specific[state.state.turn].can_castle_king_side = False
+            elif state.state.turn == PlayerEnum.black:
+                if self.move_from.file == 0 and self.move_from.rank == 7:
+                    state.specific[state.state.turn].can_castle_queen_side = False
+                if self.move_from.file == 7 and self.move_from.rank == 7:
+                    state.specific[state.state.turn].can_castle_king_side = False
+
+        if self.to_take is not None:
+            ref = state.state.board[self.to_take.file][self.to_take.rank]
+            if cache:
+                cache.to_untake = (self.to_take.file, self.to_take.rank, ref.piece, ref.player)
+            ref.piece = None
+            ref.player = None
+
+        for move in self.to_move:
+            from_ref = state.state.board[move[0].file][move[0].rank]
+            to_ref = state.state.board[move[1].file][move[1].rank]
+            if cache:
+                cache.revert_move.append(((move[0].file, move[0].rank, from_ref.piece, from_ref.player),
+                                         (move[1].file, move[1].rank, to_ref.piece, to_ref.player )) )
+
+            to_ref.piece = from_ref.piece
+            to_ref.player = from_ref.player
+            from_ref.piece = None
+            from_ref.player = None
+
+        if self.promote_piece is not None:
+            if cache:
+                cache.unpromote_position = self.move_to
+            to_ref = state.state.board[self.move_to.file][self.move_to.rank]
+            to_ref.piece = self.promote_piece
+
+
+        if cache:
+            cache.turn = state.state.turn
+        state.state.turn = PlayerEnum.white if state.state.turn == PlayerEnum.black else PlayerEnum.black
+        if cache:
+            cache.last_move_double_file = state.last_move_double_file
+        state.last_move_double_file = self.move_to.file if self.is_double_move else None
+
+    def unapply(self, state, cache):
+        state.last_move_double_file = cache.last_move_double_file
+        state.state.turn = cache.turn
+        if cache.unpromote_position:
+            ref = state.state.board[cache.unpromote_position.file][cache.unpromote_position.rank]
+            ref.piece = PieceEnum.pawn
+        for from_info, to_info in reversed(cache.revert_move):
+            from_file, from_rank, from_piece, from_player = from_info
+            to_file, to_rank, to_piece, to_player = to_info
+            state.state.board[from_file][from_rank].piece = from_piece
+            state.state.board[from_file][from_rank].player = from_player
+            state.state.board[to_file][to_rank].piece = to_piece
+            state.state.board[to_file][to_rank].player = to_player
+        if cache.to_untake:
+            untake_file, untake_rank, untake_piece, untake_player = cache.to_untake
+            state.state.board[untake_file][untake_rank].piece = untake_piece
+            state.state.board[untake_file][untake_rank].player = untake_player
+
 
 
 class ChessRulesDefault:
@@ -90,9 +178,10 @@ class ChessRulesDefault:
 
     def get_legal_moves(self, pos, check=True):
         from_ref = self.state.board[pos.file][pos.rank]
+        from_player = from_ref.player
 
         moves = []
-        if from_ref.player == self.state.turn and from_ref.piece is not None:
+        if from_player == self.state.turn and from_ref.piece is not None:
             piece = self.state.board[pos.file][pos.rank].piece
             if piece == PieceEnum.pawn:
                 moves = self.__get_legal_moves_pawn(pos)
@@ -110,11 +199,12 @@ class ChessRulesDefault:
         if check:
             legal_moves = []
             for move in moves:
-                import copy
-                copy = copy.deepcopy(self)
-                copy.move(move, check=False)
-                if not copy.is_king_threaten(from_ref.player):
+                cache = ActionMove.Cache()
+                move.apply(self, cache)
+                if not self.is_king_threaten(from_player):
                     legal_moves.append(move)
+                move.unapply(self, cache)
+
             moves = legal_moves
 
         return moves
@@ -124,44 +214,8 @@ class ChessRulesDefault:
         if action not in legal_moves:
             raise IllegalMoveException
 
-        if action.is_king_side_castle:
-            self.specific[self.state.turn].can_castle_king_side = False
-        if action.is_queen_side_castle:
-            self.specific[self.state.turn].can_castle_queen_side = False
-        if self.state.board[action.move_from.file][action.move_from.rank].piece == PieceEnum.king:
-            self.specific[self.state.turn].can_castle_king_side = False
-            self.specific[self.state.turn].can_castle_queen_side = False
-        if self.state.board[action.move_from.file][action.move_from.rank].piece == PieceEnum.rook:
-            if self.state.turn == PlayerEnum.white:
-                if action.move_from.file == 0 and action.move_from.rank == 0:
-                    self.specific[self.state.turn].can_castle_queen_side = False
-                if action.move_from.file == 7 and action.move_from.rank == 0:
-                    self.specific[self.state.turn].can_castle_king_side = False
-            elif self.state.turn == PlayerEnum.black:
-                if action.move_from.file == 0 and action.move_from.rank == 7:
-                    self.specific[self.state.turn].can_castle_queen_side = False
-                if action.move_from.file == 7 and action.move_from.rank == 7:
-                    self.specific[self.state.turn].can_castle_king_side = False
+        action.apply(self)
 
-        if action.to_take is not None:
-            ref = self.state.board[action.to_take.file][action.to_take.rank]
-            ref.piece = None
-            ref.player = None
-
-        for move in action.to_move:
-            from_ref = self.state.board[move[0].file][move[0].rank]
-            to_ref = self.state.board[move[1].file][move[1].rank]
-            to_ref.piece = from_ref.piece
-            to_ref.player = from_ref.player
-            from_ref.piece = None
-            from_ref.player = None
-
-        if action.promote_piece is not None:
-            to_ref = self.state.board[action.move_to.file][action.move_to.rank]
-            to_ref.piece = action.promote_piece
-
-        self.state.turn = PlayerEnum.white if self.state.turn == PlayerEnum.black else PlayerEnum.black
-        self.last_move_double_file = action.move_to.file if action.is_double_move else None
 
     def __threats(self, source, target):
         player = self.state.board[source.file][source.rank].player
