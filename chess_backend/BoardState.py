@@ -1,3 +1,6 @@
+from colorama import Fore, Style
+from common import PlayerEnum
+
 class PositionState:
     def __init__(self, piece=None, player=None):
         self.piece = piece
@@ -19,7 +22,11 @@ class BoardState:
         for rank in reversed(range(8)):
             for file in range(8):
                 if self.board[file][rank].piece is not None:
-                    ret += self.board[file][rank].piece.value
+                    if self.board[file][rank].player == PlayerEnum.white:
+                        color = Fore.GREEN
+                    else:
+                        color = Fore.BLUE
+                    ret += color+self.board[file][rank].piece.value+Style.RESET_ALL
                 else:
                     ret += " "
             ret += "\n"
