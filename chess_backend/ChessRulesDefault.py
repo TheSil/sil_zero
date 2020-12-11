@@ -37,8 +37,8 @@ class ActionMove:
 
     def apply(self, state, cache=None):
         if cache:
-            state.specific[state.state.turn].can_castle_king_side = cache.can_castle_king_side
-            state.specific[state.state.turn].can_castle_queen_side = cache.can_castle_queen_side
+            cache.can_castle_king_side = state.specific[state.state.turn].can_castle_king_side
+            cache.can_castle_queen_side = state.specific[state.state.turn].can_castle_queen_side
 
         if self.is_king_side_castle:
             state.specific[state.state.turn].can_castle_king_side = False
@@ -108,6 +108,9 @@ class ActionMove:
             untake_file, untake_rank, untake_piece, untake_player = cache.to_untake
             state.state.board[untake_file][untake_rank].piece = untake_piece
             state.state.board[untake_file][untake_rank].player = untake_player
+
+        state.specific[state.state.turn].can_castle_king_side = cache.can_castle_king_side
+        state.specific[state.state.turn].can_castle_queen_side = cache.can_castle_queen_side
 
 
 class ChessRulesDefault:

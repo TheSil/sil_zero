@@ -521,6 +521,19 @@ class WhiteKingQueenSideCastlingTests(unittest.TestCase):
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_queen_side)
 
+    def test_king_castling_queen_side_unaffected(self):
+        board = prepare_board(config={
+            (0, 0): (PlayerEnum.white, PieceEnum.rook),
+            (4, 0): (PlayerEnum.white, PieceEnum.king),
+            (0, 1): (PlayerEnum.white, PieceEnum.pawn),
+        },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_queen_side = True
+
+        board.move(ActionMove(Position(0, 1), Position(0, 2)))
+
+        self.assertEqual(True, board.specific[PlayerEnum.white].can_castle_queen_side)
+
     def test_king_castling_queen_side_disabled_after_rook_move(self):
         board = prepare_board(config={
             (0, 0): (PlayerEnum.white, PieceEnum.rook),
@@ -672,6 +685,19 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_king_side)
 
+    def test_king_castling_king_side_unaffected(self):
+        board = prepare_board(config={
+            (7, 0): (PlayerEnum.white, PieceEnum.rook),
+            (4, 0): (PlayerEnum.white, PieceEnum.king),
+            (0, 1): (PlayerEnum.white, PieceEnum.pawn),
+        },
+            turn=PlayerEnum.white)
+        board.specific[PlayerEnum.white].can_castle_king_side = True
+
+        board.move(ActionMove(Position(0, 1), Position(0, 2)))
+
+        self.assertEqual(True, board.specific[PlayerEnum.white].can_castle_king_side)
+
     def test_king_castling_king_side_disabled_after_rook_move(self):
         board = prepare_board(config={
             (7, 0): (PlayerEnum.white, PieceEnum.rook),
@@ -819,6 +845,11 @@ class ThreatenTests(unittest.TestCase):
         ]
 
         self.assertCountEqual(expected_legal_moves, legal_moves)
+
+class ScratchTests(unittest.TestCase):
+
+    def test_scratch(self):
+        pass
 
 
 if __name__ == '__main__':
