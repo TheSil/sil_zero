@@ -1,6 +1,5 @@
 from common import PieceEnum, PlayerEnum, Position, IllegalMoveException
 from BoardState import BoardState
-import copy
 
 
 class ActionMove:
@@ -34,8 +33,6 @@ class ActionMove:
             self.to_move = [(pos_from, pos_to)]
 
     def __eq__(self, other):
-        # return isinstance(other, ActionMove) and \
-        #        self.move_from == other.move_from and self.move_to == other.move_to
         return isinstance(other, ActionMove) and \
             self.__dict__ == other.__dict__
 

@@ -1,4 +1,3 @@
-from ChessRulesDefault import ChessRulesDefault
 from common import Position, PlayerEnum, PieceEnum
 import copy
 
