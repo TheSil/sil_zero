@@ -3,6 +3,7 @@ from chess_backend.common import Position, PlayerEnum
 from PlayerController import PlayerController
 from RandomAiController import RandomAiController
 from chess_backend.ChessGame import ChessGame
+from os import system
 
 if __name__ == '__main__':
 
@@ -24,9 +25,11 @@ if __name__ == '__main__':
             selected = black.select_action(game.rules.state, legal_moves)
 
         action = legal_moves[selected]
-        print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
+
         game.move(selected)
+        system('cls')
         print(game.rules.state)
+        print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
         idx += 1
 
     if game.state == game.WHITE_WON:

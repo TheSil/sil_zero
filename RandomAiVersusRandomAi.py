@@ -2,6 +2,7 @@ from chess_backend.ChessRulesDefault import ChessRulesDefault
 from chess_backend.common import PlayerEnum
 from RandomAiController import RandomAiController
 from chess_backend.ChessGame import ChessGame
+from os import system
 
 
 def main(do_print=True):
@@ -24,6 +25,7 @@ def main(do_print=True):
         action = legal_moves[selected]
         game.move(selected)
         if do_print:
+            system('cls')
             print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
             print(game.rules.state)
 
