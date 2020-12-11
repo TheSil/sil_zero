@@ -1,5 +1,5 @@
-from common import PieceEnum, PlayerEnum, Position, IllegalMoveException
-from BoardState import BoardState
+from .common import PieceEnum, PlayerEnum, Position, IllegalMoveException
+from .BoardState import BoardState
 
 
 class ActionMove:

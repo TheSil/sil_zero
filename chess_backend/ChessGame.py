@@ -1,4 +1,4 @@
-from common import Position, PlayerEnum, PieceEnum
+from .common import Position, PlayerEnum, PieceEnum
 import copy
 
 only_king = {

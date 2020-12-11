@@ -1,8 +1,8 @@
-from ChessRulesDefault import ChessRulesDefault
-from common import Position, PlayerEnum
+from chess_backend.ChessRulesDefault import ChessRulesDefault
+from chess_backend.common import Position, PlayerEnum
 from PlayerController import PlayerController
 from RandomAiController import RandomAiController
-from ChessGame import ChessGame
+from chess_backend.ChessGame import ChessGame
 
 if __name__ == '__main__':
 
@@ -14,6 +14,7 @@ if __name__ == '__main__':
     black = RandomAiController()
 
     idx = 1
+    print(game.rules.state)
     while game.state == game.RUNNING:
 
         legal_moves = game.actions
