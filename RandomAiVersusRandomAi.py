@@ -1,11 +1,10 @@
 from chess_backend.ChessRulesDefault import ChessRulesDefault
-from chess_backend.common import Position, PlayerEnum
-from PlayerController import PlayerController
+from chess_backend.common import PlayerEnum
 from RandomAiController import RandomAiController
 from chess_backend.ChessGame import ChessGame
 
-def main(do_print=True):
 
+def main(do_print=True):
     rules = ChessRulesDefault()
     game = ChessGame(rules)
     game.start_new()
@@ -44,10 +43,5 @@ def main(do_print=True):
 if __name__ == '__main__':
     main()
 
-    #import cProfile
-    #cProfile.run('main(do_print=False)', sort="tottime")
-
-
-
-
-
+    # import cProfile
+    # cProfile.run('main(do_print=False)', sort="tottime")
