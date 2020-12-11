@@ -4,6 +4,7 @@ from PlayerController import PlayerController
 from RandomAiController import RandomAiController
 from chess_backend.ChessGame import ChessGame
 from os import system
+from ui.console import draw_board
 
 if __name__ == '__main__':
 
@@ -15,7 +16,7 @@ if __name__ == '__main__':
     black = RandomAiController()
 
     idx = 1
-    print(game.rules.state)
+    draw_board(game.rules.state)
     while game.state == game.RUNNING:
 
         legal_moves = game.actions
@@ -28,7 +29,7 @@ if __name__ == '__main__':
 
         game.move(selected)
         system('cls')
-        print(game.rules.state)
+        draw_board(game.rules.state)
         print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
         idx += 1
 

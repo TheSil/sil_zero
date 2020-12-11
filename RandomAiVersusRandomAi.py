@@ -3,6 +3,7 @@ from chess_backend.common import PlayerEnum
 from RandomAiController import RandomAiController
 from chess_backend.ChessGame import ChessGame
 from os import system
+from ui.console import draw_board
 
 
 def main(do_print=True):
@@ -27,7 +28,7 @@ def main(do_print=True):
         if do_print:
             system('cls')
             print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
-            print(game.rules.state)
+            draw_board(game.rules.state)
 
         idx += 1
 
