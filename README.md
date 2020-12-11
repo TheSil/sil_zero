@@ -15,10 +15,10 @@ Try running test suite:
 
 `python -m unittest discover`
 
-You can try running playing versus random AI:
+You can try playing versus random AI:
 
 `python PlayerVersusRandomAi.py`
 
-Or you can try running random vs random:
+Or you can try autoplay random vs random:
 
 `python RandomAiVersusRandomAi.py`
