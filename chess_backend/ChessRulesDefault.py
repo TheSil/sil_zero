@@ -364,7 +364,8 @@ class ChessRulesDefault:
 
 
                     if self.state.board[take_pos.file][take_pos.rank].player is None and \
-                            self.last_move_double_file == take_pos.file:
+                            self.last_move_double_file == take_pos.file and \
+                            take_pos.rank == end_rank - 2 * direction:
                         # en passant
                         moves.append(ActionMove(pos,
                                                 take_pos,

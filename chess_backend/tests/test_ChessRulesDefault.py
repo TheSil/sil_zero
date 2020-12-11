@@ -118,6 +118,19 @@ class WhitePawnMoveTests(unittest.TestCase):
                               move_to=(1, 4)
                               )
 
+        board = prepare_board(config={
+            (0, 5): (PlayerEnum.white, PieceEnum.pawn),
+            (1, 4): (PlayerEnum.black, PieceEnum.pawn)
+            },
+            turn=PlayerEnum.white)
+        board.last_move_double_file = 1
+        check_move_is_illegal(self,
+                              board,
+                              move_from=(0, 5),
+                              move_to=(1, 6)
+                              )
+
+
     def test_pawn_move_en_passant(self):
         board = prepare_board(config={
             (3, 4): (PlayerEnum.white, PieceEnum.pawn),
