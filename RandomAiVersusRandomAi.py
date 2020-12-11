@@ -16,8 +16,6 @@ if __name__ == '__main__':
     idx = 1
     while game.state == game.RUNNING:
 
-        print(game.rules.state)
-
         legal_moves = game.actions
         if game.rules.state.turn == PlayerEnum.white:
             selected = white.select_action(game.rules.state, legal_moves)
@@ -27,8 +25,8 @@ if __name__ == '__main__':
         action = legal_moves[selected]
         print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
         game.move(selected)
+        print(game.rules.state)
         idx += 1
-
 
     if game.state == game.WHITE_WON:
         print(f"Game finished, white won")
@@ -36,5 +34,7 @@ if __name__ == '__main__':
         print(f"Game finished, black won")
     elif game.state == game.STALEMATE:
         print(f"Game finished, stalemate")
+    elif game.state == game.DRAW:
+        print(f"Game finished, draw")
 
 

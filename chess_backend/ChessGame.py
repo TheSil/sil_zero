@@ -1,5 +1,31 @@
 from ChessRulesDefault import ChessRulesDefault
-from common import Position, PlayerEnum
+from common import Position, PlayerEnum, PieceEnum
+import copy
+
+only_king = {
+            PieceEnum.pawn: 0,
+            PieceEnum.rook: 0,
+            PieceEnum.knight: 0,
+            PieceEnum.bishop: 0,
+            PieceEnum.queen: 0,
+            PieceEnum.king: 1
+           }
+king_bishop = {
+            PieceEnum.pawn: 0,
+            PieceEnum.rook: 0,
+            PieceEnum.knight: 0,
+            PieceEnum.bishop: 1,
+            PieceEnum.queen: 0,
+            PieceEnum.king: 1
+           }
+king_knight = {
+            PieceEnum.pawn: 0,
+            PieceEnum.rook: 0,
+            PieceEnum.knight: 1,
+            PieceEnum.bishop: 0,
+            PieceEnum.queen: 0,
+            PieceEnum.king: 1
+           }
 
 class ChessGame:
 
@@ -8,6 +34,7 @@ class ChessGame:
     WHITE_WON = 2
     BLACK_WON = 3
     STALEMATE = 4
+    DRAW = 5
 
     def __init__(self, rules):
         self.rules = rules
@@ -35,6 +62,57 @@ class ChessGame:
                 self.state = self.BLACK_WON
             else:
                 self.state = self.WHITE_WON
+
+        # basic draw conditions checking
+        white_counts = {
+            PieceEnum.pawn: 0,
+            PieceEnum.rook: 0,
+            PieceEnum.knight: 0,
+            PieceEnum.bishop: 0,
+            PieceEnum.queen: 0,
+            PieceEnum.king: 0,
+        }
+        white_even_bishops = 0
+        white_odd_bishops = 0
+        black_even_bishops = 0
+        black_odd_bishops = 0
+        black_counts = copy.copy(white_counts)
+
+        for file in range(8):
+            for rank in range(8):
+                if self.rules.state.board[file][rank].player == PlayerEnum.white:
+                    white_counts[self.rules.state.board[file][rank].piece] += 1
+                    if self.rules.state.board[file][rank].piece == PieceEnum.bishop:
+                        if file + rank % 2 == 0:
+                            white_even_bishops += 1
+                        else:
+                            white_odd_bishops += 1
+
+                elif self.rules.state.board[file][rank].player == PlayerEnum.black:
+                    black_counts[self.rules.state.board[file][rank].piece] += 1
+                    if self.rules.state.board[file][rank].piece == PieceEnum.bishop:
+                        if file + rank % 2 == 0:
+                            black_even_bishops += 1
+                        else:
+                            black_odd_bishops += 1
+
+        if white_counts == only_king:
+            if black_counts == only_king or \
+               black_counts == king_bishop or \
+               black_counts == king_knight:
+                self.state = self.DRAW
+
+        if black_counts == only_king:
+            if white_counts == only_king or \
+               white_counts == king_bishop or \
+               white_counts == king_knight:
+                self.state = self.DRAW
+
+        if black_counts == king_bishop and white_counts == king_bishop:
+            if white_even_bishops == black_even_bishops and \
+                white_odd_bishops == black_odd_bishops:
+                self.state = self.DRAW
+
 
     def __update_actions(self):
         legal_moves = []
