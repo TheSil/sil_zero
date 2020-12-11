@@ -1,5 +1,5 @@
 from colorama import Fore, Style, Back, init
-from .common import PlayerEnum
+from chess_backend.common import PlayerEnum
 import os
 
 if 'PYCHARM_HOSTED' not in os.environ:

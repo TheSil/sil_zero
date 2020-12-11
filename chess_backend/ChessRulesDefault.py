@@ -1,5 +1,5 @@
-from .common import PieceEnum, PlayerEnum, Position, IllegalMoveException
-from .BoardState import BoardState
+from chess_backend.common import PieceEnum, PlayerEnum, Position, IllegalMoveException
+from chess_backend.BoardState import BoardState
 
 
 class ActionMove:

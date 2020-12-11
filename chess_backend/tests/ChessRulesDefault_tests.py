@@ -1,6 +1,6 @@
 import unittest
-from common import Position, PlayerEnum, PieceEnum, IllegalMoveException
-from ChessRulesDefault import ChessRulesDefault, ActionMove
+from chess_backend.common import Position, PlayerEnum, PieceEnum, IllegalMoveException
+from chess_backend.ChessRulesDefault import ChessRulesDefault, ActionMove
 
 
 def prepare_board(config, turn):

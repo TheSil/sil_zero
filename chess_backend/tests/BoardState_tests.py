@@ -1,6 +1,6 @@
 import unittest
-from common import PlayerEnum, PieceEnum
-import BoardState
+from chess_backend.common import PlayerEnum, PieceEnum
+from chess_backend import BoardState
 
 class BoardStateTests(unittest.TestCase):
 
