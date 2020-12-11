@@ -24,22 +24,29 @@ class BoardState:
     def __str__(self):
         ret = ""
         for rank in reversed(range(8)):
-            ret += str(rank + 1)
-            for file in range(8):
-                field_str = "  "
-                if self.board[file][rank].piece is not None:
-                    if self.board[file][rank].player == PlayerEnum.white:
-                        color = Fore.MAGENTA
-                    else:
-                        color = Fore.GREEN
 
-                    field_str = color+self.board[file][rank].piece.value+" "
-
-                if (file + rank) % 2 == 1:
-                    bgcolor = Back.LIGHTWHITE_EX
+            for i in range(3):
+                ret += Back.RED
+                if i == 1:
+                    ret += str(rank + 1)+" "
                 else:
-                    bgcolor = Back.BLACK
-                ret += bgcolor+field_str+Style.RESET_ALL
-            ret += "\n"
-        ret += " a b c d e f g h"
+                    ret += "  "
+                ret += Style.RESET_ALL
+                for file in range(8):
+                    field_str = "     "
+                    if self.board[file][rank].piece is not None and i == 1:
+                        if self.board[file][rank].player == PlayerEnum.white:
+                            color = Fore.MAGENTA
+                        else:
+                            color = Fore.GREEN
+
+                        field_str = color+"  "+self.board[file][rank].piece.value+"  "
+
+                    if (file + rank) % 2 == 1:
+                        bgcolor = Back.LIGHTWHITE_EX
+                    else:
+                        bgcolor = Back.BLACK
+                    ret += bgcolor+field_str+Style.RESET_ALL
+                ret += "\n"
+        ret += Back.RED + "    a    b    c    d    e    f    g    h  " + Style.RESET_ALL
         return ret
