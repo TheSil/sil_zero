@@ -38,7 +38,7 @@ class BoardState:
                 if (file + rank) % 2 == 1:
                     bgcolor = Back.LIGHTWHITE_EX
                 else:
-                    bgcolor = ""
+                    bgcolor = Back.BLACK
                 ret += bgcolor+field_str+Style.RESET_ALL
             ret += "\n"
         ret += " abcdefgh"
