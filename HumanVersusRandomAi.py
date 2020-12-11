@@ -1,7 +1,7 @@
 from chess_backend.ChessRulesDefault import ChessRulesDefault
 from chess_backend.common import Position, PlayerEnum
-from PlayerController import PlayerController
-from RandomAiController import RandomAiController
+from agents.HumanConsoleAgent import HumanConsoleAgent
+from agents.RandomAiAgent import RandomAiAgent
 from chess_backend.ChessGame import ChessGame
 from os import system
 from ui.console import draw_board
@@ -12,8 +12,8 @@ if __name__ == '__main__':
     game = ChessGame(rules)
     game.start_new()
 
-    white = PlayerController()
-    black = RandomAiController()
+    white = HumanConsoleAgent()
+    black = RandomAiAgent()
 
     idx = 1
     draw_board(game.rules.state)

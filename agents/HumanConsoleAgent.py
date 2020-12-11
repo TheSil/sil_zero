@@ -1,4 +1,4 @@
-class PlayerController:
+class HumanConsoleAgent:
     def select_action(self, state, actions):
         while True:
             i = 0

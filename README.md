@@ -17,7 +17,7 @@ Try running test suite:
 
 You can try playing versus random AI:
 
-`python PlayerVersusRandomAi.py`
+`python HumanVersusRandomAi.py`
 
 Or you can try autoplay random vs random:
 
