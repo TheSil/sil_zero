@@ -330,13 +330,11 @@ class ChessRulesDefault:
         end_rank = 7 if self.state.turn == PlayerEnum.white else 0
         if pos.rank != end_rank:
             move_pos = Position(pos.file, pos.rank + direction)
+
             if self.state.board[move_pos.file][move_pos.rank].piece is None:
                 if pos.rank == end_rank - direction:
-                    # about to promote
-                    moves.append(ActionMove(pos, move_pos, promote_piece=PieceEnum.knight))
-                    moves.append(ActionMove(pos, move_pos, promote_piece=PieceEnum.bishop))
-                    moves.append(ActionMove(pos, move_pos, promote_piece=PieceEnum.rook))
-                    moves.append(ActionMove(pos, move_pos, promote_piece=PieceEnum.queen))
+                    for promote_piece in (PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook, PieceEnum.queen):
+                        moves.append(ActionMove(pos, move_pos, promote_piece=promote_piece))
                 else:
                     moves.append(ActionMove(pos,
                                             move_pos))
@@ -351,9 +349,20 @@ class ChessRulesDefault:
                 if 0 <= take_pos.file < 8:
                     if self.state.board[take_pos.file][take_pos.rank].player is not None and \
                             self.state.board[take_pos.file][take_pos.rank].player != ref.player:
-                        moves.append(ActionMove(pos,
-                                                take_pos,
-                                                to_take=take_pos))
+
+                        if pos.rank == end_rank - direction:
+                            # promote by taking
+                            for promote_piece in (PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook, PieceEnum.queen):
+                                moves.append(ActionMove(pos,
+                                                        take_pos,
+                                                        to_take=take_pos,
+                                                        promote_piece=promote_piece))
+                        else:
+                            moves.append(ActionMove(pos,
+                                                    take_pos,
+                                                    to_take=take_pos))
+
+
                     if self.state.board[take_pos.file][take_pos.rank].player is None and \
                             self.last_move_double_file == take_pos.file:
                         # en passant

@@ -200,6 +200,26 @@ class WhitePawnPromotionTests(unittest.TestCase):
                            pos_to=Position(4, 7),
                            promote_piece=promoted_piece))
 
+    def test_promote_by_taking(self):
+        board = prepare_board(config={
+            (7, 6): (PlayerEnum.white, PieceEnum.pawn),
+            (6, 7): (PlayerEnum.black, PieceEnum.knight),
+            (7, 7): (PlayerEnum.black, PieceEnum.rook)
+        },
+            turn=PlayerEnum.white
+        )
+
+        legal_moves = board.get_legal_moves(Position(7, 6))
+        expected_legal_moves = [
+            ActionMove(Position(7, 6), Position(6, 7), to_take=Position(6,7), promote_piece=PieceEnum.bishop),
+            ActionMove(Position(7, 6), Position(6, 7), to_take=Position(6, 7), promote_piece=PieceEnum.knight),
+            ActionMove(Position(7, 6), Position(6, 7), to_take=Position(6, 7), promote_piece=PieceEnum.rook),
+            ActionMove(Position(7, 6), Position(6, 7), to_take=Position(6, 7), promote_piece=PieceEnum.queen),
+        ]
+
+        self.assertCountEqual(expected_legal_moves, legal_moves)
+
+
 
 class WhiteRookMoveTests(unittest.TestCase):
 
