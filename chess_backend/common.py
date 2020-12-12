@@ -31,7 +31,7 @@ class Position:
         return cls(ord(text_coords[0]) - ord('a'), ord(text_coords[1]) - ord('1'))
 
 def POS(text_coords):
-    return Position(text_coords)
+    return Position.from_str(text_coords)
 
 class IllegalMoveException(Exception):
     pass
