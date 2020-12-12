@@ -7,8 +7,8 @@ from ui.console import draw_board
 
 
 def main(do_print=True):
-    white = RandomAiAgent()
-    black = RandomAiAgent()
+    white = RandomAiAgent(prefer_takes=True)
+    black = RandomAiAgent(prefer_takes=True)
 
     game_number = 1
     white_wins = 0
