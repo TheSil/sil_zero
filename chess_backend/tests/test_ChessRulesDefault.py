@@ -1,5 +1,5 @@
 import unittest
-from chess_backend.common import Position, PlayerEnum, PieceEnum, IllegalMoveException
+from chess_backend.common import Position, POS, PlayerEnum, PieceEnum, IllegalMoveException
 from chess_backend.ChessRulesDefault import ChessRulesDefault, ActionMove
 
 
@@ -83,58 +83,58 @@ class WhitePawnMoveTests(unittest.TestCase):
     def test_pawn_move_single(self):
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("b2"): (PlayerEnum.white, PieceEnum.pawn)
+                                  POS("b2"): (PlayerEnum.white, PieceEnum.pawn)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("b3"): (PlayerEnum.white, PieceEnum.pawn)
+                                  POS("b3"): (PlayerEnum.white, PieceEnum.pawn)
                               },
-                              move_from=Position.from_str("b2"),
-                              move_to=Position.from_str("b3")
+                              move_from=POS("b2"),
+                              move_to=POS("b3")
                               )
 
     def test_pawn_move_double(self):
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("b2"): (PlayerEnum.white, PieceEnum.pawn)
+                                  POS("b2"): (PlayerEnum.white, PieceEnum.pawn)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("b4"): (PlayerEnum.white, PieceEnum.pawn)
+                                  POS("b4"): (PlayerEnum.white, PieceEnum.pawn)
                               },
 
-                              move_from=Position.from_str("b2"),
-                              move_to=Position.from_str("b4"),
+                              move_from=POS("b2"),
+                              move_to=POS("b4"),
                               is_double_move=True,
                               )
 
     def test_pawn_move_double_not_allowed(self):
         check_move_is_illegal(self,
                               prepare_board(config={
-                                  Position.from_str("b3"): (PlayerEnum.white, PieceEnum.pawn)
+                                  POS("b3"): (PlayerEnum.white, PieceEnum.pawn)
                               },
                                   turn=PlayerEnum.white),
-                              move_from=Position.from_str("b3"),
-                              move_to=Position.from_str("b5")
+                              move_from=POS("b3"),
+                              move_to=POS("b5")
                               )
 
         board = prepare_board(config={
-            Position.from_str("a6"): (PlayerEnum.white, PieceEnum.pawn),
-            Position.from_str("b5"): (PlayerEnum.black, PieceEnum.pawn)
+            POS("a6"): (PlayerEnum.white, PieceEnum.pawn),
+            POS("b5"): (PlayerEnum.black, PieceEnum.pawn)
             },
             turn=PlayerEnum.white)
         board.last_move_double_file = 1
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("a6"),
-                              move_to=Position.from_str("b7")
+                              move_from=POS("a6"),
+                              move_to=POS("b7")
                               )
 
 
     def test_pawn_move_en_passant(self):
         board = prepare_board(config={
-            Position.from_str("d5"): (PlayerEnum.white, PieceEnum.pawn),
-            Position.from_str("e6"): (PlayerEnum.black, PieceEnum.pawn)
+            POS("d5"): (PlayerEnum.white, PieceEnum.pawn),
+            POS("e6"): (PlayerEnum.black, PieceEnum.pawn)
         },
             turn=PlayerEnum.white)
         board.last_move_double_file = 4
@@ -142,25 +142,25 @@ class WhitePawnMoveTests(unittest.TestCase):
         check_move_is_allowed(self,
                               board,
                               after_config_expected={
-                                  Position.from_str("e6"): (PlayerEnum.white, PieceEnum.pawn)
+                                  POS("e6"): (PlayerEnum.white, PieceEnum.pawn)
                               },
-                              move_from=Position.from_str("d5"),
-                              move_to=Position.from_str("e6"),
-                              to_take=Position.from_str("e6")
+                              move_from=POS("d5"),
+                              move_to=POS("e6"),
+                              to_take=POS("e6")
                               )
 
     def test_pawn_move_illegal_in_check(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("a8"): (PlayerEnum.black, PieceEnum.queen),
-            Position.from_str("d5"): (PlayerEnum.white, PieceEnum.pawn),
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("d5"): (PlayerEnum.white, PieceEnum.pawn),
         },
             turn=PlayerEnum.white)
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("d5"),
-                              move_to=Position.from_str("d6")
+                              move_from=POS("d5"),
+                              move_to=POS("d6")
                               )
 
 
@@ -170,13 +170,13 @@ class WhitePawnPromotionTests(unittest.TestCase):
 
         for promoted_piece in (PieceEnum.queen, PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook):
             board = prepare_board(config={
-                Position.from_str("a7"): (PlayerEnum.white, PieceEnum.pawn)
+                POS("a7"): (PlayerEnum.white, PieceEnum.pawn)
             },
                 turn=PlayerEnum.white
             )
 
-            board.move(ActionMove(pos_from=Position.from_str("a7"),
-                       pos_to=Position.from_str("a8"),
+            board.move(ActionMove(pos_from=POS("a7"),
+                       pos_to=POS("a8"),
                        promote_piece=promoted_piece))
 
             self.assertEqual(None, board.state.board[0][6].piece)
@@ -187,51 +187,51 @@ class WhitePawnPromotionTests(unittest.TestCase):
     def test_promote_blocked_illegal(self):
         for promoted_piece in (PieceEnum.queen, PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook):
             board = prepare_board(config={
-                Position.from_str("a7"): (PlayerEnum.white, PieceEnum.pawn),
-                Position.from_str("a8"): (PlayerEnum.black, PieceEnum.queen)
+                POS("a7"): (PlayerEnum.white, PieceEnum.pawn),
+                POS("a8"): (PlayerEnum.black, PieceEnum.queen)
             },
                 turn=PlayerEnum.white
             )
 
             with self.assertRaises(IllegalMoveException):
-                board.move(ActionMove(pos_from=Position.from_str("a7"),
-                           pos_to=Position.from_str("a8"),
+                board.move(ActionMove(pos_from=POS("a7"),
+                           pos_to=POS("a8"),
                            promote_piece=promoted_piece))
 
     def test_promote_causing_check_illegal(self):
         for promoted_piece in (PieceEnum.queen, PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook):
             board = prepare_board(config={
-                Position.from_str("e7"): (PlayerEnum.white, PieceEnum.pawn),
-                Position.from_str("h7"): (PlayerEnum.white, PieceEnum.king),
-                Position.from_str("a7"): (PlayerEnum.black, PieceEnum.queen),
+                POS("e7"): (PlayerEnum.white, PieceEnum.pawn),
+                POS("h7"): (PlayerEnum.white, PieceEnum.king),
+                POS("a7"): (PlayerEnum.black, PieceEnum.queen),
             },
                 turn=PlayerEnum.white
             )
 
             with self.assertRaises(IllegalMoveException):
-                board.move(ActionMove(pos_from=Position.from_str("e7"),
-                           pos_to=Position.from_str("e8"),
+                board.move(ActionMove(pos_from=POS("e7"),
+                           pos_to=POS("e8"),
                            promote_piece=promoted_piece))
 
     def test_promote_by_taking(self):
         board = prepare_board(config={
-            Position.from_str("h7"): (PlayerEnum.white, PieceEnum.pawn),
-            Position.from_str("g8"): (PlayerEnum.black, PieceEnum.knight),
-            Position.from_str("h8"): (PlayerEnum.black, PieceEnum.rook)
+            POS("h7"): (PlayerEnum.white, PieceEnum.pawn),
+            POS("g8"): (PlayerEnum.black, PieceEnum.knight),
+            POS("h8"): (PlayerEnum.black, PieceEnum.rook)
         },
             turn=PlayerEnum.white
         )
 
-        legal_moves = board.get_legal_moves(Position.from_str("h7"))
+        legal_moves = board.get_legal_moves(POS("h7"))
         expected_legal_moves = [
-            ActionMove(Position.from_str("h7"), Position.from_str("g8"),
-                       to_take=Position.from_str("g8"), promote_piece=PieceEnum.bishop),
-            ActionMove(Position.from_str("h7"), Position.from_str("g8"),
-                       to_take=Position.from_str("g8"), promote_piece=PieceEnum.knight),
-            ActionMove(Position.from_str("h7"), Position.from_str("g8"),
-                       to_take=Position.from_str("g8"), promote_piece=PieceEnum.rook),
-            ActionMove(Position.from_str("h7"), Position.from_str("g8"),
-                       to_take=Position.from_str("g8"), promote_piece=PieceEnum.queen),
+            ActionMove(POS("h7"), POS("g8"),
+                       to_take=POS("g8"), promote_piece=PieceEnum.bishop),
+            ActionMove(POS("h7"), POS("g8"),
+                       to_take=POS("g8"), promote_piece=PieceEnum.knight),
+            ActionMove(POS("h7"), POS("g8"),
+                       to_take=POS("g8"), promote_piece=PieceEnum.rook),
+            ActionMove(POS("h7"), POS("g8"),
+                       to_take=POS("g8"), promote_piece=PieceEnum.queen),
         ]
 
         self.assertCountEqual(expected_legal_moves, legal_moves)
@@ -243,53 +243,53 @@ class WhiteRookMoveTests(unittest.TestCase):
     def test_rook_move_horizontal(self):
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("b2"): (PlayerEnum.white, PieceEnum.rook)
+                                  POS("b2"): (PlayerEnum.white, PieceEnum.rook)
                               },
                                   turn=PlayerEnum.white
                               ),
                               after_config_expected={
-                                  Position.from_str("b1"): (PlayerEnum.white, PieceEnum.rook)
+                                  POS("b1"): (PlayerEnum.white, PieceEnum.rook)
                               },
-                              move_from=Position.from_str("b2"),
-                              move_to=Position.from_str("b1")
+                              move_from=POS("b2"),
+                              move_to=POS("b1")
                               )
 
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("b1"): (PlayerEnum.white, PieceEnum.rook)
+                                  POS("b1"): (PlayerEnum.white, PieceEnum.rook)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("b8"): (PlayerEnum.white, PieceEnum.rook)
+                                  POS("b8"): (PlayerEnum.white, PieceEnum.rook)
                               },
-                              move_from=Position.from_str("b1"),
-                              move_to=Position.from_str("b8")
+                              move_from=POS("b1"),
+                              move_to=POS("b8")
                               )
 
     def test_rook_move_horizontal_illegal(self):
         check_move_is_illegal(self,
                               prepare_board(config={
-                                  Position.from_str("b1"): (PlayerEnum.white, PieceEnum.rook),
-                                  Position.from_str("b6"): (PlayerEnum.black, PieceEnum.rook)
+                                  POS("b1"): (PlayerEnum.white, PieceEnum.rook),
+                                  POS("b6"): (PlayerEnum.black, PieceEnum.rook)
                               },
                                   turn=PlayerEnum.white
                               ),
-                              move_from=Position.from_str("b1"),
-                              move_to=Position.from_str("b8")
+                              move_from=POS("b1"),
+                              move_to=POS("b8")
                               )
 
     def test_rook_move_illegal_in_check(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("a8"): (PlayerEnum.black, PieceEnum.queen),
-            Position.from_str("d5"): (PlayerEnum.white, PieceEnum.rook),
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("d5"): (PlayerEnum.white, PieceEnum.rook),
         },
             turn=PlayerEnum.white)
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("d5"),
-                              move_to=Position.from_str("d6")
+                              move_from=POS("d5"),
+                              move_to=POS("d6")
                               )
 
 
@@ -298,50 +298,50 @@ class WhiteKnightMoveTests(unittest.TestCase):
     def test_knight_move(self):
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("a1"): (PlayerEnum.white, PieceEnum.knight)
+                                  POS("a1"): (PlayerEnum.white, PieceEnum.knight)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("c2"): (PlayerEnum.white, PieceEnum.knight)
+                                  POS("c2"): (PlayerEnum.white, PieceEnum.knight)
                               },
-                              move_from=Position.from_str("a1"),
-                              move_to=Position.from_str("c2")
+                              move_from=POS("a1"),
+                              move_to=POS("c2")
                               )
 
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("c2"): (PlayerEnum.white, PieceEnum.knight)
+                                  POS("c2"): (PlayerEnum.white, PieceEnum.knight)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("d4"): (PlayerEnum.white, PieceEnum.knight)
+                                  POS("d4"): (PlayerEnum.white, PieceEnum.knight)
                               },
-                              move_from=Position.from_str("c2"),
-                              move_to=Position.from_str("d4")
+                              move_from=POS("c2"),
+                              move_to=POS("d4")
                               )
 
     def test_knight_move_illegal(self):
         check_move_is_illegal(self,
                               prepare_board(config={
-                                  Position.from_str("a1"): (PlayerEnum.white, PieceEnum.knight)
+                                  POS("a1"): (PlayerEnum.white, PieceEnum.knight)
                               },
                                   turn=PlayerEnum.white),
-                              move_from=Position.from_str("a1"),
-                              move_to=Position.from_str("c3")
+                              move_from=POS("a1"),
+                              move_to=POS("c3")
                               )
 
     def test_knight_move_illegal_in_check(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("a8"): (PlayerEnum.black, PieceEnum.queen),
-            Position.from_str("d5"): (PlayerEnum.white, PieceEnum.knight),
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("d5"): (PlayerEnum.white, PieceEnum.knight),
         },
             turn=PlayerEnum.white)
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("d5"),
-                              move_to=Position.from_str("f6")
+                              move_from=POS("d5"),
+                              move_to=POS("f6")
                               )
 
 
@@ -350,49 +350,49 @@ class WhiteBishopMoveTests(unittest.TestCase):
     def test_bishop_move(self):
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("a1"): (PlayerEnum.white, PieceEnum.bishop)
+                                  POS("a1"): (PlayerEnum.white, PieceEnum.bishop)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("e5"): (PlayerEnum.white, PieceEnum.bishop)
+                                  POS("e5"): (PlayerEnum.white, PieceEnum.bishop)
                               },
-                              move_from=Position.from_str("a1"),
-                              move_to=Position.from_str("e5")
+                              move_from=POS("a1"),
+                              move_to=POS("e5")
                               )
 
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("e5"): (PlayerEnum.white, PieceEnum.bishop)
+                                  POS("e5"): (PlayerEnum.white, PieceEnum.bishop)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("h2"): (PlayerEnum.white, PieceEnum.bishop)
+                                  POS("h2"): (PlayerEnum.white, PieceEnum.bishop)
                               },
-                              move_from=Position.from_str("e5"),
-                              move_to=Position.from_str("h2")
+                              move_from=POS("e5"),
+                              move_to=POS("h2")
                               )
 
     def test_bishop_move_illegal(self):
         check_move_is_illegal(self,
                               prepare_board(config={
-                                  Position.from_str("e5"): (PlayerEnum.white, PieceEnum.bishop)
+                                  POS("e5"): (PlayerEnum.white, PieceEnum.bishop)
                               }, turn=PlayerEnum.white),
-                              move_from=Position.from_str("e5"),
-                              move_to=Position.from_str("e1")
+                              move_from=POS("e5"),
+                              move_to=POS("e1")
                               )
 
     def test_bishop_move_illegal_in_check(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("a8"): (PlayerEnum.black, PieceEnum.queen),
-            Position.from_str("d5"): (PlayerEnum.white, PieceEnum.bishop),
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("d5"): (PlayerEnum.white, PieceEnum.bishop),
         },
             turn=PlayerEnum.white)
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("d5"),
-                              move_to=Position.from_str("e6")
+                              move_from=POS("d5"),
+                              move_to=POS("e6")
                               )
 
 
@@ -401,50 +401,50 @@ class WhiteQueenMoveTests(unittest.TestCase):
     def test_queen_move(self):
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("a1"): (PlayerEnum.white, PieceEnum.queen)
+                                  POS("a1"): (PlayerEnum.white, PieceEnum.queen)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("e5"): (PlayerEnum.white, PieceEnum.queen)
+                                  POS("e5"): (PlayerEnum.white, PieceEnum.queen)
                               },
-                              move_from=Position.from_str("a1"),
-                              move_to=Position.from_str("e5")
+                              move_from=POS("a1"),
+                              move_to=POS("e5")
                               )
 
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("e5"): (PlayerEnum.white, PieceEnum.queen)
+                                  POS("e5"): (PlayerEnum.white, PieceEnum.queen)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("h2"): (PlayerEnum.white, PieceEnum.queen)
+                                  POS("h2"): (PlayerEnum.white, PieceEnum.queen)
                               },
-                              move_from=Position.from_str("e5"),
-                              move_to=Position.from_str("h2")
+                              move_from=POS("e5"),
+                              move_to=POS("h2")
                               )
 
     def test_queen_move_illegal(self):
         check_move_is_illegal(self,
                               prepare_board(config={
-                                  Position.from_str("e5"): (PlayerEnum.white, PieceEnum.queen)
+                                  POS("e5"): (PlayerEnum.white, PieceEnum.queen)
                               },
                                   turn=PlayerEnum.white),
-                              move_from=Position.from_str("e5"),
-                              move_to=Position.from_str("g6")
+                              move_from=POS("e5"),
+                              move_to=POS("g6")
                               )
 
     def test_queen_move_illegal_in_check(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("a8"): (PlayerEnum.black, PieceEnum.queen),
-            Position.from_str("d5"): (PlayerEnum.white, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("d5"): (PlayerEnum.white, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("d5"),
-                              move_to=Position.from_str("e6")
+                              move_from=POS("d5"),
+                              move_to=POS("e6")
                               )
 
 
@@ -453,49 +453,49 @@ class WhiteKingMoveTests(unittest.TestCase):
     def test_king_move(self):
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("a1"): (PlayerEnum.white, PieceEnum.king)
+                                  POS("a1"): (PlayerEnum.white, PieceEnum.king)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("a2"): (PlayerEnum.white, PieceEnum.king)
+                                  POS("a2"): (PlayerEnum.white, PieceEnum.king)
                               },
-                              move_from=Position.from_str("a1"),
-                              move_to=Position.from_str("a2")
+                              move_from=POS("a1"),
+                              move_to=POS("a2")
                               )
 
         check_move_is_allowed(self,
                               prepare_board(config={
-                                  Position.from_str("a2"): (PlayerEnum.white, PieceEnum.king)
+                                  POS("a2"): (PlayerEnum.white, PieceEnum.king)
                               },
                                   turn=PlayerEnum.white),
                               after_config_expected={
-                                  Position.from_str("b2"): (PlayerEnum.white, PieceEnum.king)
+                                  POS("b2"): (PlayerEnum.white, PieceEnum.king)
                               },
-                              move_from=Position.from_str("a2"),
-                              move_to=Position.from_str("b2")
+                              move_from=POS("a2"),
+                              move_to=POS("b2")
                               )
 
     def test_king_move_illegal(self):
         check_move_is_illegal(self,
                               prepare_board(config={
-                                  Position.from_str("a1"): (PlayerEnum.white, PieceEnum.king)
+                                  POS("a1"): (PlayerEnum.white, PieceEnum.king)
                               },
                                   turn=PlayerEnum.white),
-                              move_from=Position.from_str("a1"),
-                              move_to=Position.from_str("a3")
+                              move_from=POS("a1"),
+                              move_to=POS("a3")
                               )
 
     def test_king_move_illegal_in_check(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("a8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a8"): (PlayerEnum.black, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("a1"),
-                              move_to=Position.from_str("a2")
+                              move_from=POS("a1"),
+                              move_to=POS("a2")
                               )
 
 
@@ -503,8 +503,8 @@ class WhiteKingQueenSideCastlingTests(unittest.TestCase):
 
     def test_king_castling_queen_side(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king)
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king)
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
@@ -512,14 +512,14 @@ class WhiteKingQueenSideCastlingTests(unittest.TestCase):
         check_move_is_allowed(self,
                               board,
                               after_config_expected={
-                                  Position.from_str("c1"): (PlayerEnum.white, PieceEnum.rook),
-                                  Position.from_str("b1"): (PlayerEnum.white, PieceEnum.king)
+                                  POS("c1"): (PlayerEnum.white, PieceEnum.rook),
+                                  POS("b1"): (PlayerEnum.white, PieceEnum.king)
                               },
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("b1"),
+                              move_from=POS("e1"),
+                              move_to=POS("b1"),
                               is_queen_side_castle=True,
-                              to_move=[(Position.from_str("e1"),Position.from_str("b1")),
-                                       (Position.from_str("a1"),Position.from_str("c1"))
+                              to_move=[(POS("e1"),POS("b1")),
+                                       (POS("a1"),POS("c1"))
                               ]
                               )
 
@@ -527,138 +527,138 @@ class WhiteKingQueenSideCastlingTests(unittest.TestCase):
 
     def test_king_castling_queen_side_unaffected(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("a2"): (PlayerEnum.white, PieceEnum.pawn),
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a2"): (PlayerEnum.white, PieceEnum.pawn),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
-        board.move(ActionMove(Position.from_str("a2"), Position.from_str("a3")))
+        board.move(ActionMove(POS("a2"), POS("a3")))
 
         self.assertEqual(True, board.specific[PlayerEnum.white].can_castle_queen_side)
 
     def test_king_castling_queen_side_disabled_after_rook_move(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king)
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king)
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
-        board.move(ActionMove(Position.from_str("a1"), Position.from_str("a2")))
+        board.move(ActionMove(POS("a1"), POS("a2")))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_queen_side)
 
     def test_king_castling_queen_side_disabled_after_king_move(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king)
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king)
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
-        board.move(ActionMove(Position.from_str("e1"), Position.from_str("e2")))
+        board.move(ActionMove(POS("e1"), POS("e2")))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_queen_side)
 
     def test_king_castling_queen_side_illegal_when_threaten(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("e8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("e8"): (PlayerEnum.black, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("b1")
+                              move_from=POS("e1"),
+                              move_to=POS("b1")
                               )
 
     def test_king_castling_queen_side_illegal_when_threaten_between(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("d8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("d8"): (PlayerEnum.black, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("b1")
+                              move_from=POS("e1"),
+                              move_to=POS("b1")
                               )
 
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("c8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("c8"): (PlayerEnum.black, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("b1")
+                              move_from=POS("e1"),
+                              move_to=POS("b1")
                               )
 
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("b8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("b8"): (PlayerEnum.black, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("b1")
+                              move_from=POS("e1"),
+                              move_to=POS("b1")
                               )
 
     def test_king_castling_queen_side_illegal_when_something_between(self):
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("b1"): (PlayerEnum.white, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("b1"): (PlayerEnum.white, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("b1")
+                              move_from=POS("e1"),
+                              move_to=POS("b1")
                               )
 
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("c1"): (PlayerEnum.white, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("c1"): (PlayerEnum.white, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("b1")
+                              move_from=POS("e1"),
+                              move_to=POS("b1")
                               )
 
         board = prepare_board(config={
-            Position.from_str("a1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("d1"): (PlayerEnum.white, PieceEnum.queen),
+            POS("a1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("d1"): (PlayerEnum.white, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("b1")
+                              move_from=POS("e1"),
+                              move_to=POS("b1")
                               )
 
 
@@ -666,8 +666,8 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
 
     def test_king_castling_king_side(self):
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king)
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king)
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
@@ -675,15 +675,15 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
         check_move_is_allowed(self,
                               board,
                               after_config_expected={
-                                  Position.from_str("f1"): (PlayerEnum.white, PieceEnum.rook),
-                                  Position.from_str("g1"): (PlayerEnum.white, PieceEnum.king)
+                                  POS("f1"): (PlayerEnum.white, PieceEnum.rook),
+                                  POS("g1"): (PlayerEnum.white, PieceEnum.king)
                               },
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("g1"),
+                              move_from=POS("e1"),
+                              move_to=POS("g1"),
                               is_king_side_castle=True,
                               to_move=[
-                                  (Position.from_str("e1"), Position.from_str("g1")),
-                                  (Position.from_str("h1"), Position.from_str("f1")),
+                                  (POS("e1"), POS("g1")),
+                                  (POS("h1"), POS("f1")),
                               ]
                               )
 
@@ -691,110 +691,110 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
 
     def test_king_castling_king_side_unaffected(self):
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("a2"): (PlayerEnum.white, PieceEnum.pawn),
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a2"): (PlayerEnum.white, PieceEnum.pawn),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
 
-        board.move(ActionMove(Position.from_str("a2"), Position.from_str("a3")))
+        board.move(ActionMove(POS("a2"), POS("a3")))
 
         self.assertEqual(True, board.specific[PlayerEnum.white].can_castle_king_side)
 
     def test_king_castling_king_side_disabled_after_rook_move(self):
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king)
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king)
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
-        board.move(ActionMove(Position.from_str("h1"), Position.from_str("h2")))
+        board.move(ActionMove(POS("h1"), POS("h2")))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_king_side)
 
     def test_king_castling_king_side_disabled_after_king_move(self):
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king)
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king)
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
-        board.move(ActionMove(Position.from_str("e1"), Position.from_str("e2")))
+        board.move(ActionMove(POS("e1"), POS("e2")))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_king_side)
 
     def test_king_castling_king_side_illegal_when_threaten(self):
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("e8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("e8"): (PlayerEnum.black, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("g1")
+                              move_from=POS("e1"),
+                              move_to=POS("g1")
                               )
 
     def test_king_castling_king_side_illegal_when_threaten_between(self):
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("f8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("f8"): (PlayerEnum.black, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("g1")
+                              move_from=POS("e1"),
+                              move_to=POS("g1")
                               )
 
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("g8"): (PlayerEnum.black, PieceEnum.queen),
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("g8"): (PlayerEnum.black, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("g1")
+                              move_from=POS("e1"),
+                              move_to=POS("g1")
                               )
 
     def test_king_castling_king_side_illegal_when_something_between(self):
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("g1"): (PlayerEnum.white, PieceEnum.queen),
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("g1"): (PlayerEnum.white, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("g1")
+                              move_from=POS("e1"),
+                              move_to=POS("g1")
                               )
 
         board = prepare_board(config={
-            Position.from_str("h1"): (PlayerEnum.white, PieceEnum.rook),
-            Position.from_str("e1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("f1"): (PlayerEnum.white, PieceEnum.queen),
+            POS("h1"): (PlayerEnum.white, PieceEnum.rook),
+            POS("e1"): (PlayerEnum.white, PieceEnum.king),
+            POS("f1"): (PlayerEnum.white, PieceEnum.queen),
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
 
         check_move_is_illegal(self,
                               board,
-                              move_from=Position.from_str("e1"),
-                              move_to=Position.from_str("g1")
+                              move_from=POS("e1"),
+                              move_to=POS("g1")
                               )
 
 
@@ -802,50 +802,50 @@ class ThreatenTests(unittest.TestCase):
 
     def test_king_threaten_by_pawn(self):
         board = prepare_board(config={
-            Position.from_str("g1"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("g2"): (PlayerEnum.black, PieceEnum.rook),
-            Position.from_str("f3"): (PlayerEnum.black, PieceEnum.pawn),
+            POS("g1"): (PlayerEnum.white, PieceEnum.king),
+            POS("g2"): (PlayerEnum.black, PieceEnum.rook),
+            POS("f3"): (PlayerEnum.black, PieceEnum.pawn),
         },
             turn=PlayerEnum.white)
 
-        legal_moves = board.get_legal_moves(Position.from_str("g1"))
+        legal_moves = board.get_legal_moves(POS("g1"))
         expected_legal_moves = [
-            ActionMove(Position.from_str("g1"), Position.from_str("f1")),
-            ActionMove(Position.from_str("g1"), Position.from_str("h1")),
+            ActionMove(POS("g1"), POS("f1")),
+            ActionMove(POS("g1"), POS("h1")),
         ]
 
         self.assertCountEqual(expected_legal_moves, legal_moves)
 
     def test_king_threaten_by_bishop(self):
         board = prepare_board(config={
-            Position.from_str("c7"): (PlayerEnum.black, PieceEnum.king),
-            Position.from_str("e7"): (PlayerEnum.white, PieceEnum.bishop)
+            POS("c7"): (PlayerEnum.black, PieceEnum.king),
+            POS("e7"): (PlayerEnum.white, PieceEnum.bishop)
         },
             turn=PlayerEnum.black)
 
-        legal_moves = board.get_legal_moves(Position.from_str("c7"))
+        legal_moves = board.get_legal_moves(POS("c7"))
         expected_legal_moves = [
-            ActionMove(Position.from_str("c7"), Position.from_str("c8")),
-            ActionMove(Position.from_str("c7"), Position.from_str("c6")),
-            ActionMove(Position.from_str("c7"), Position.from_str("b6")),
-            ActionMove(Position.from_str("c7"), Position.from_str("b7")),
-            ActionMove(Position.from_str("c7"), Position.from_str("b8")),
-            ActionMove(Position.from_str("c7"), Position.from_str("d7")),
+            ActionMove(POS("c7"), POS("c8")),
+            ActionMove(POS("c7"), POS("c6")),
+            ActionMove(POS("c7"), POS("b6")),
+            ActionMove(POS("c7"), POS("b7")),
+            ActionMove(POS("c7"), POS("b8")),
+            ActionMove(POS("c7"), POS("d7")),
         ]
 
         self.assertCountEqual(expected_legal_moves, legal_moves)
 
     def test_king_threaten_by_king(self):
         board = prepare_board(config={
-            Position.from_str("d8"): (PlayerEnum.white, PieceEnum.king),
-            Position.from_str("d6"): (PlayerEnum.black, PieceEnum.king)
+            POS("d8"): (PlayerEnum.white, PieceEnum.king),
+            POS("d6"): (PlayerEnum.black, PieceEnum.king)
         },
             turn=PlayerEnum.white)
 
-        legal_moves = board.get_legal_moves(Position.from_str("d8"))
+        legal_moves = board.get_legal_moves(POS("d8"))
         expected_legal_moves = [
-            ActionMove(Position.from_str("d8"), Position.from_str("c8")),
-            ActionMove(Position.from_str("d8"), Position.from_str("e8")),
+            ActionMove(POS("d8"), POS("c8")),
+            ActionMove(POS("d8"), POS("e8")),
         ]
 
         self.assertCountEqual(expected_legal_moves, legal_moves)
