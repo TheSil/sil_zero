@@ -23,5 +23,12 @@ class Position:
     def __str__(self):
         return chr(ord('a')+self.file) + str(self.rank + 1)
 
+    def __hash__(self):
+        return hash((self.file, self.rank))
+
+    @classmethod
+    def from_str(cls, text_coords):
+        return cls(ord(text_coords[0]) - ord('a'), ord(text_coords[1]) - ord('1'))
+
 class IllegalMoveException(Exception):
     pass
