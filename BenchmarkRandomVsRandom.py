@@ -22,7 +22,7 @@ def main(do_print=True):
         idx = 1
         while game.state == game.RUNNING:
 
-            legal_moves = game.actions
+            legal_moves = rules.legal_moves
             if game.rules.state.turn == PlayerEnum.white:
                 selected = white.select_action(game.rules.state, legal_moves)
             else:

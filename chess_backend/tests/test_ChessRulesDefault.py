@@ -9,6 +9,7 @@ def prepare_board(config, turn):
         rules.state.board[pos.file][pos.rank].player = player
         rules.state.board[pos.file][pos.rank].piece = piece
     rules.state.turn = turn
+    rules.update_legal_moves()
     return rules
 
 
@@ -508,6 +509,7 @@ class WhiteKingQueenSideCastlingTests(unittest.TestCase):
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
+        board.update_legal_moves()
 
         check_move_is_allowed(self,
                               board,
@@ -671,6 +673,7 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
+        board.update_legal_moves()
 
         check_move_is_allowed(self,
                               board,

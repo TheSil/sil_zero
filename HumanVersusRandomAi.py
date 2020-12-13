@@ -19,7 +19,7 @@ if __name__ == '__main__':
     ui.draw_board(game.rules.state)
     while game.state == game.RUNNING:
 
-        legal_moves = game.actions
+        legal_moves = rules.legal_moves
         if game.rules.state.turn == PlayerEnum.white:
             selected = white.select_action(game.rules.state, legal_moves)
         else:
@@ -29,7 +29,11 @@ if __name__ == '__main__':
 
         game.move(selected)
         ui.draw_board(game.rules.state)
-        print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
+        if action.claim_draw:
+            print(f"{idx}. move chosen: claim draw")
+        else:
+            print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
+
         idx += 1
 
     if game.state == game.WHITE_WON:

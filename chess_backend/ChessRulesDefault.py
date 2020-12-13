@@ -12,6 +12,7 @@ class ActionMove:
             self.can_castle_king_side = None
             self.can_castle_queen_side = None
             self.turn = None
+            self.move_without_take_and_pawn_move = 0
 
     def __init__(self, pos_from, pos_to,
                  to_move=None,
@@ -19,7 +20,8 @@ class ActionMove:
                  is_double_move=False,
                  is_queen_side_castle=False,
                  is_king_side_castle=False,
-                 promote_piece=None):
+                 promote_piece=None,
+                 claim_draw=False):
         self.move_from = pos_from
         self.move_to = pos_to
         self.to_move = to_move
@@ -28,6 +30,7 @@ class ActionMove:
         self.is_queen_side_castle = is_queen_side_castle
         self.is_king_side_castle = is_king_side_castle
         self.promote_piece = promote_piece
+        self.claim_draw = claim_draw
         if self.to_move is None:
             self.to_move = [(pos_from, pos_to)]
 
@@ -36,6 +39,11 @@ class ActionMove:
                self.__dict__ == other.__dict__
 
     def apply(self, state, cache=None):
+
+        if self.claim_draw:
+            state.draw_claimed = True
+            return
+
         if cache:
             cache.can_castle_king_side = state.specific[state.state.turn].can_castle_king_side
             cache.can_castle_queen_side = state.specific[state.state.turn].can_castle_queen_side
@@ -89,10 +97,27 @@ class ActionMove:
         state.state.turn = PlayerEnum.white if state.state.turn == PlayerEnum.black else PlayerEnum.black
         if cache:
             cache.last_move_double_file = state.last_move_double_file
+
+        if cache:
+            cache.move_without_take_and_pawn_move = state.move_without_take_and_pawn_move
+
+        state.move_without_take_and_pawn_move += 1
+        if self.move_from is not None:
+            if state.state.board[self.move_from.file][self.move_from.rank].piece == PieceEnum.pawn:
+                state.move_without_take_and_pawn_move = 0
+            if self.to_take is not None:
+                state.move_without_take_and_pawn_move = 0
+
         state.last_move_double_file = self.move_to.file if self.is_double_move else None
 
     def unapply(self, state, cache):
+
+        if self.claim_draw:
+            state.draw_claimed = False
+            return
+
         state.last_move_double_file = cache.last_move_double_file
+        state.move_without_take_and_pawn_move = cache.move_without_take_and_pawn_move
         state.state.turn = cache.turn
         if cache.unpromote_position:
             ref = state.state.board[cache.unpromote_position.file][cache.unpromote_position.rank]
@@ -161,6 +186,9 @@ class ChessRulesDefault:
         self.specific = dict()
         self.specific[PlayerEnum.white] = self.SpecificPlayerState()
         self.specific[PlayerEnum.black] = self.SpecificPlayerState()
+        self.draw_claimed = False
+        self.move_without_take_and_pawn_move = 0
+        self.legal_moves = []
 
     def setup_board(self):
         self.state.clear_board()
@@ -172,12 +200,24 @@ class ChessRulesDefault:
         for definition in self.default_pieces:
             self.state.board[definition[0]][definition[1]].piece = definition[2]
             self.state.board[definition[0]][definition[1]].player = definition[3]
+        self.update_legal_moves()
 
-    def get_legal_moves(self, pos, check=True):
+    def get_all_legal_moves(self):
+        legal_moves = []
+        for file in range(8):
+            for rank in range(8):
+                if self.state.board[file][rank].player == self.state.turn:
+                    moves = self.get_legal_moves(Position(file, rank))
+                    legal_moves += moves
+
+        self.add_non_movement_legal_actions(legal_moves)
+        return legal_moves
+
+    def get_legal_moves(self, pos):
+        moves = []
+
         from_ref = self.state.board[pos.file][pos.rank]
         from_player = from_ref.player
-
-        moves = []
         if from_player == self.state.turn and from_ref.piece is not None:
             piece = self.state.board[pos.file][pos.rank].piece
             if piece == PieceEnum.pawn:
@@ -193,25 +233,37 @@ class ChessRulesDefault:
             elif piece == PieceEnum.queen:
                 moves = self.__get_legal_moves_queen(pos)
 
-        if check:
-            legal_moves = []
-            for move in moves:
-                cache = ActionMove.Cache()
-                move.apply(self, cache)
-                if not self.is_king_threaten(from_player):
-                    legal_moves.append(move)
-                move.unapply(self, cache)
+        legal_moves = []
+        for move in moves:
+            cache = ActionMove.Cache()
+            move.apply(self, cache)
+            if not self.is_king_threaten(from_player):
+                legal_moves.append(move)
+            move.unapply(self, cache)
 
-            moves = legal_moves
+        return legal_moves
 
-        return moves
-
-    def move(self, action, check=True):
-        legal_moves = self.get_legal_moves(action.move_from, check)
-        if action not in legal_moves:
+    def move(self, action):
+        if action not in self.legal_moves:
             raise IllegalMoveException
 
         action.apply(self)
+        self.update_legal_moves()
+
+    def update_legal_moves(self):
+        self.legal_moves = self.get_all_legal_moves()
+
+    def add_non_movement_legal_actions(self, moves):
+        if self.move_without_take_and_pawn_move >= 50:
+            # there have been 50 moves without take or pawn move already
+            moves.append(ActionMove(pos_from=None, pos_to=None, claim_draw=True))
+        elif self.move_without_take_and_pawn_move >= 49:
+            # we are about to make 50th move without take or pawn move
+            for move in moves:
+                if move.to_take is None and \
+                        self.state.board[move.move_from.file][move.move_from.rank].piece != PieceEnum.pawn:
+                    moves.append(ActionMove(pos_from=None, pos_to=None, claim_draw=True))
+                    break
 
     def __threats(self, source, target):
         player = self.state.board[source.file][source.rank].player
@@ -219,7 +271,7 @@ class ChessRulesDefault:
         if piece == PieceEnum.pawn:
             direction = 1 if player == PlayerEnum.white else -1
             return target.rank == source.rank + direction and \
-                (target.file == source.file + 1 or target.file == source.file - 1)
+                   (target.file == source.file + 1 or target.file == source.file - 1)
         elif piece == PieceEnum.knight:
             dx = target.file - source.file
             dy = target.rank - source.rank
@@ -364,7 +416,6 @@ class ChessRulesDefault:
                             moves.append(ActionMove(pos,
                                                     take_pos,
                                                     to_take=take_pos))
-
 
                     if self.state.board[take_pos.file][take_pos.rank].player is None and \
                             self.last_move_double_file == take_pos.file and \

@@ -18,7 +18,8 @@ class Position:
         self.rank = rank
 
     def __eq__(self, other) :
-        return self.__dict__ == other.__dict__
+        return isinstance(other, Position) and \
+               self.__dict__ == other.__dict__
 
     def __str__(self):
         return chr(ord('a')+self.file) + str(self.rank + 1)

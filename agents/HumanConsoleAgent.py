@@ -5,9 +5,15 @@ class HumanConsoleAgent:
             try:
                 for move in actions:
                     promote_hint = move.promote_piece.name if move.promote_piece is not None else ''
-                    print(
-                        f"{i}: {move.move_from} -> {move.move_to} {promote_hint}\t\t",
-                        end='')
+                    if move.claim_draw:
+                        print(
+                            f"{i}: claim draw \t\t",
+                            end='')
+                    else:
+                        print(
+                            f"{i}: {move.move_from} -> {move.move_to} {promote_hint}\t\t",
+                            end='')
+
                     i += 1
                     if i % 3 == 0:
                         print("")

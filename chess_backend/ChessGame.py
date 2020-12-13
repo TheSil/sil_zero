@@ -38,22 +38,19 @@ class ChessGame:
     def __init__(self, rules):
         self.rules = rules
         self.state = self.NOT_STARTED
-        self.actions = None
 
     def start_new(self):
         self.rules.setup_board()
-        self.__update_actions()
         self.state = self.RUNNING
 
     def move(self, action_index):
         if self.state != self.RUNNING:
             return
 
-        action = self.actions[action_index]
+        action = self.rules.legal_moves[action_index]
         self.rules.move(action)
-        self.__update_actions()
 
-        if not self.actions:
+        if not self.rules.legal_moves:
             if not self.rules.is_king_threaten(self.rules.state.turn):
                 self.state = self.STALEMATE
             elif self.rules.state.turn == PlayerEnum.white:
@@ -112,12 +109,7 @@ class ChessGame:
                 white_odd_bishops == black_odd_bishops:
                 self.state = self.DRAW
 
+        if self.rules.draw_claimed:
+            self.state = self.DRAW
 
-    def __update_actions(self):
-        legal_moves = []
-        for file in range(8):
-            for rank in range(8):
-                if self.rules.state.board[file][rank].player == self.rules.state.turn:
-                    moves = self.rules.get_legal_moves(Position(file, rank))
-                    legal_moves += moves
-        self.actions = legal_moves
+
