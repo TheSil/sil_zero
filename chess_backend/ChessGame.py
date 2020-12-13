@@ -1,33 +1,33 @@
-from chess_backend.common import Position, PlayerEnum, PieceEnum
+from chess_backend.common import PlayerEnum, PieceEnum
 import copy
 
 only_king = {
-            PieceEnum.pawn: 0,
-            PieceEnum.rook: 0,
-            PieceEnum.knight: 0,
-            PieceEnum.bishop: 0,
-            PieceEnum.queen: 0,
-            PieceEnum.king: 1
-           }
+    PieceEnum.pawn: 0,
+    PieceEnum.rook: 0,
+    PieceEnum.knight: 0,
+    PieceEnum.bishop: 0,
+    PieceEnum.queen: 0,
+    PieceEnum.king: 1
+}
 king_bishop = {
-            PieceEnum.pawn: 0,
-            PieceEnum.rook: 0,
-            PieceEnum.knight: 0,
-            PieceEnum.bishop: 1,
-            PieceEnum.queen: 0,
-            PieceEnum.king: 1
-           }
+    PieceEnum.pawn: 0,
+    PieceEnum.rook: 0,
+    PieceEnum.knight: 0,
+    PieceEnum.bishop: 1,
+    PieceEnum.queen: 0,
+    PieceEnum.king: 1
+}
 king_knight = {
-            PieceEnum.pawn: 0,
-            PieceEnum.rook: 0,
-            PieceEnum.knight: 1,
-            PieceEnum.bishop: 0,
-            PieceEnum.queen: 0,
-            PieceEnum.king: 1
-           }
+    PieceEnum.pawn: 0,
+    PieceEnum.rook: 0,
+    PieceEnum.knight: 1,
+    PieceEnum.bishop: 0,
+    PieceEnum.queen: 0,
+    PieceEnum.king: 1
+}
+
 
 class ChessGame:
-
     NOT_STARTED = 0
     RUNNING = 1
     WHITE_WON = 2
@@ -94,22 +94,20 @@ class ChessGame:
 
         if white_counts == only_king:
             if black_counts == only_king or \
-               black_counts == king_bishop or \
-               black_counts == king_knight:
+                    black_counts == king_bishop or \
+                    black_counts == king_knight:
                 self.state = self.DRAW
 
         if black_counts == only_king:
             if white_counts == only_king or \
-               white_counts == king_bishop or \
-               white_counts == king_knight:
+                    white_counts == king_bishop or \
+                    white_counts == king_knight:
                 self.state = self.DRAW
 
         if black_counts == king_bishop and white_counts == king_bishop:
             if white_even_bishops == black_even_bishops and \
-                white_odd_bishops == black_odd_bishops:
+                    white_odd_bishops == black_odd_bishops:
                 self.state = self.DRAW
 
         if self.rules.draw_claimed:
             self.state = self.DRAW
-
-

@@ -43,9 +43,9 @@ def main(do_print=True):
         all += 1
 
         print(f"{game_number:4d}: "
-              f"white_wins:{(100*white_wins)/all:3.2f}%\t"
-              f"black_wins:{(100*black_wins)/all:3.2f}%\t"
-              f"draws:{(100*draws)/all:3.2f}%")
+              f"white_wins:{(100 * white_wins) / all:3.2f}%\t"
+              f"black_wins:{(100 * black_wins) / all:3.2f}%\t"
+              f"draws:{(100 * draws) / all:3.2f}%")
         game_number += 1
 
 

@@ -838,6 +838,25 @@ class ThreatenTests(unittest.TestCase):
 
         self.assertCountEqual(expected_legal_moves, legal_moves)
 
+    def test_king_threaten_by_knight(self):
+        board = prepare_board(config={
+            POS("c7"): (PlayerEnum.black, PieceEnum.king),
+            POS("e5"): (PlayerEnum.white, PieceEnum.knight)
+        },
+            turn=PlayerEnum.black)
+
+        legal_moves = board.get_legal_moves(POS("c7"))
+        expected_legal_moves = [
+            ActionMove(POS("c7"), POS("c8")),
+            ActionMove(POS("c7"), POS("b6")),
+            ActionMove(POS("c7"), POS("b7")),
+            ActionMove(POS("c7"), POS("b8")),
+            ActionMove(POS("c7"), POS("d8")),
+            ActionMove(POS("c7"), POS("d6"))
+        ]
+
+        self.assertCountEqual(expected_legal_moves, legal_moves)
+
     def test_king_threaten_by_king(self):
         board = prepare_board(config={
             POS("d8"): (PlayerEnum.white, PieceEnum.king),

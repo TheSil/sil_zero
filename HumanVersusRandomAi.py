@@ -1,5 +1,5 @@
 from chess_backend.ChessRulesDefault import ChessRulesDefault
-from chess_backend.common import Position, PlayerEnum
+from chess_backend.common import PlayerEnum
 from agents.HumanConsoleAgent import HumanConsoleAgent
 from agents.RandomAiAgent import RandomAiAgent
 from chess_backend.ChessGame import ChessGame
