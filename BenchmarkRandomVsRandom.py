@@ -2,8 +2,6 @@ from chess_backend.ChessRulesDefault import ChessRulesDefault
 from chess_backend.common import PlayerEnum
 from agents.RandomAiAgent import RandomAiAgent
 from chess_backend.ChessGame import ChessGame
-from os import system
-from ui.console import draw_board
 
 
 def main(do_print=True):

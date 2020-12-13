@@ -3,8 +3,7 @@ from chess_backend.common import Position, PlayerEnum
 from agents.HumanConsoleAgent import HumanConsoleAgent
 from agents.RandomAiAgent import RandomAiAgent
 from chess_backend.ChessGame import ChessGame
-from os import system
-from ui.console import draw_board
+from ui.console import ConsoleUi
 
 if __name__ == '__main__':
 
@@ -14,9 +13,10 @@ if __name__ == '__main__':
 
     white = HumanConsoleAgent()
     black = RandomAiAgent()
+    ui = ConsoleUi()
 
     idx = 1
-    draw_board(game.rules.state)
+    ui.draw_board(game.rules.state)
     while game.state == game.RUNNING:
 
         legal_moves = game.actions
@@ -28,8 +28,7 @@ if __name__ == '__main__':
         action = legal_moves[selected]
 
         game.move(selected)
-        system('cls')
-        draw_board(game.rules.state)
+        ui.draw_board(game.rules.state)
         print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
         idx += 1
 

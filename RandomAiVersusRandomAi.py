@@ -2,8 +2,7 @@ from chess_backend.ChessRulesDefault import ChessRulesDefault
 from chess_backend.common import PlayerEnum
 from agents.RandomAiAgent import RandomAiAgent
 from chess_backend.ChessGame import ChessGame
-from os import system
-from ui.console import draw_board
+from ui.console import ConsoleUi
 
 
 def main(do_print=True):
@@ -11,8 +10,9 @@ def main(do_print=True):
     game = ChessGame(rules)
     game.start_new()
 
-    white = RandomAiAgent()
-    black = RandomAiAgent()
+    white = RandomAiAgent(prefer_takes=True)
+    black = RandomAiAgent(prefer_takes=True)
+    ui = ConsoleUi()
 
     idx = 1
     while game.state == game.RUNNING:
@@ -23,12 +23,9 @@ def main(do_print=True):
         else:
             selected = black.select_action(game.rules.state, legal_moves)
 
-        action = legal_moves[selected]
         game.move(selected)
         if do_print:
-            system('cls')
-            print(f"{idx}. move chosen: {action.move_from} -> {action.move_to}")
-            draw_board(game.rules.state)
+            ui.draw_board(game.rules.state)
 
         idx += 1
 
