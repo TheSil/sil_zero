@@ -74,6 +74,16 @@ class ActionMove:
             ref.piece = None
             ref.player = None
 
+        if cache:
+            cache.move_without_take_and_pawn_move = state.move_without_take_and_pawn_move
+
+        state.move_without_take_and_pawn_move += 1
+        if self.move_from is not None:
+            if state.state.board[self.move_from.file][self.move_from.rank].piece == PieceEnum.pawn:
+                state.move_without_take_and_pawn_move = 0
+            if self.to_take is not None:
+                state.move_without_take_and_pawn_move = 0
+
         for move in self.to_move:
             from_ref = state.state.board[move[0].file][move[0].rank]
             to_ref = state.state.board[move[1].file][move[1].rank]
@@ -97,16 +107,6 @@ class ActionMove:
         state.state.turn = PlayerEnum.white if state.state.turn == PlayerEnum.black else PlayerEnum.black
         if cache:
             cache.last_move_double_file = state.last_move_double_file
-
-        if cache:
-            cache.move_without_take_and_pawn_move = state.move_without_take_and_pawn_move
-
-        state.move_without_take_and_pawn_move += 1
-        if self.move_from is not None:
-            if state.state.board[self.move_from.file][self.move_from.rank].piece == PieceEnum.pawn:
-                state.move_without_take_and_pawn_move = 0
-            if self.to_take is not None:
-                state.move_without_take_and_pawn_move = 0
 
         state.last_move_double_file = self.move_to.file if self.is_double_move else None
 
@@ -254,10 +254,10 @@ class ChessRulesDefault:
         self.legal_moves = self.get_all_legal_moves()
 
     def add_non_movement_legal_actions(self, moves):
-        if self.move_without_take_and_pawn_move >= 50:
+        if self.move_without_take_and_pawn_move > 2*50:
             # there have been 50 moves without take or pawn move already
             moves.append(ActionMove(pos_from=None, pos_to=None, claim_draw=True))
-        elif self.move_without_take_and_pawn_move >= 49:
+        elif self.move_without_take_and_pawn_move > 2*49:
             # we are about to make 50th move without take or pawn move
             for move in moves:
                 if move.to_take is None and \

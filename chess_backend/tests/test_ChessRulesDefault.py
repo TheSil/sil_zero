@@ -853,6 +853,132 @@ class ThreatenTests(unittest.TestCase):
 
         self.assertCountEqual(expected_legal_moves, legal_moves)
 
+class FiftyMovesRuleTests(unittest.TestCase):
+
+    def test_fifty_moves(self):
+        board = prepare_board(config={
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("a8"): (PlayerEnum.black, PieceEnum.king)
+        },
+            turn=PlayerEnum.white)
+
+        white_pos1, white_pos2 = POS("a1"), POS("b1")
+        black_pos1, black_pos2 = POS("a8"), POS("b8")
+        for _ in range(49): # 49 moves don't take/move pawn
+            board.move(ActionMove(white_pos1, white_pos2))
+            board.move(ActionMove(black_pos1, black_pos2))
+
+            white_pos1, white_pos2 = white_pos2, white_pos1
+            black_pos1, black_pos2 = black_pos2, black_pos1
+
+        self.assertNotIn(ActionMove(pos_from=None,pos_to=None, claim_draw=True), board.legal_moves)
+
+        # white does his 50th move, then the draw should be possible for black
+        board.move(ActionMove(white_pos1, white_pos2))
+        self.assertIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
+
+        # after both made their 50th moves, it should be possible for white as well
+        board.move(ActionMove(black_pos1, black_pos2))
+        self.assertIn(ActionMove(pos_from=None,pos_to=None, claim_draw=True), board.legal_moves)
+
+    def test_fifty_moves_rest_by_pawn_move(self):
+        board = prepare_board(config={
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("h2"): (PlayerEnum.white, PieceEnum.pawn),
+            POS("a8"): (PlayerEnum.black, PieceEnum.king),
+            POS("h7"): (PlayerEnum.black, PieceEnum.pawn),
+        },
+            turn=PlayerEnum.white)
+
+        white_pos1, white_pos2 = POS("a1"), POS("b1")
+        black_pos1, black_pos2 = POS("a8"), POS("b8")
+        for _ in range(48): # 48 moves don't take/move pawn
+            board.move(ActionMove(white_pos1, white_pos2))
+            board.move(ActionMove(black_pos1, black_pos2))
+
+            white_pos1, white_pos2 = white_pos2, white_pos1
+            black_pos1, black_pos2 = black_pos2, black_pos1
+
+        # 49th move are just pawns
+        board.move(ActionMove(POS("h2"), POS("h3")))
+        self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
+        board.move(ActionMove(POS("h7"), POS("h6")))
+
+        # pawns should break the counter, draw should not be possible
+        self.assertNotIn(ActionMove(pos_from=None,pos_to=None,claim_draw=True), board.legal_moves)
+
+        # not even after another 49 moves!
+        for _ in range(49):
+            board.move(ActionMove(white_pos1, white_pos2))
+            board.move(ActionMove(black_pos1, black_pos2))
+
+            white_pos1, white_pos2 = white_pos2, white_pos1
+            black_pos1, black_pos2 = black_pos2, black_pos1
+
+        self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
+
+    def test_fifty_moves_rest_by_take_move(self):
+        board = prepare_board(config={
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("h2"): (PlayerEnum.white, PieceEnum.rook),
+            POS("a8"): (PlayerEnum.black, PieceEnum.king),
+            POS("h3"): (PlayerEnum.black, PieceEnum.rook),
+            POS("h4"): (PlayerEnum.black, PieceEnum.rook),
+        },
+            turn=PlayerEnum.white)
+
+        white_pos1, white_pos2 = POS("a1"), POS("b1")
+        black_pos1, black_pos2 = POS("a8"), POS("b8")
+        for _ in range(48): # 48 moves don't take/move pawn
+            board.move(ActionMove(white_pos1, white_pos2))
+            board.move(ActionMove(black_pos1, black_pos2))
+
+            white_pos1, white_pos2 = white_pos2, white_pos1
+            black_pos1, black_pos2 = black_pos2, black_pos1
+
+        # 49th move are rooks taking
+        board.move(ActionMove(POS("h2"), POS("h3"), to_take=POS("h3")))
+        board.move(ActionMove(POS("h4"), POS("h3"), to_take=POS("h3")))
+        self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
+
+        # not even after another 49 moves!
+        for _ in range(49):
+            board.move(ActionMove(white_pos1, white_pos2))
+            board.move(ActionMove(black_pos1, black_pos2))
+
+            white_pos1, white_pos2 = white_pos2, white_pos1
+            black_pos1, black_pos2 = black_pos2, black_pos1
+
+        self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
+
+    def test_fifty_moves_next_move_50_take(self):
+        board = prepare_board(config={
+            POS("a1"): (PlayerEnum.white, PieceEnum.king),
+            POS("h7"): (PlayerEnum.white, PieceEnum.queen),
+            POS("a8"): (PlayerEnum.black, PieceEnum.king)
+        },
+            turn=PlayerEnum.white)
+
+        white_pos1, white_pos2 = POS("a1"), POS("b1")
+        black_pos1, black_pos2 = POS("a8"), POS("b8")
+        for _ in range(49): # 49 moves don't take/move pawn
+            board.move(ActionMove(white_pos1, white_pos2))
+            board.move(ActionMove(black_pos1, black_pos2))
+
+            white_pos1, white_pos2 = white_pos2, white_pos1
+            black_pos1, black_pos2 = black_pos2, black_pos1
+
+        # first 50th move white moves queen next to black king, forcing only take moves
+        board.move(ActionMove(POS("h7"), POS("b7")))
+
+        # black's only option is to take, so he cannot claim a draw as his 50th move will be take
+        self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
+
+        # black takes, and moves counter rest, so draw not possible for white
+        board.move(ActionMove(black_pos1, POS("b7"), to_take=POS("b7")))
+        self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
+
+
 class ScratchTests(unittest.TestCase):
 
     def test_scratch(self):
