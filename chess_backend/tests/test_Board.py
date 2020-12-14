@@ -1,11 +1,11 @@
 import unittest
 from chess_backend.common import PlayerEnum, PieceEnum
-from chess_backend import BoardState
+from chess_backend import Board
 
 class BoardStateTests(unittest.TestCase):
 
     def test_clean(self):
-        state = BoardState.BoardState()
+        state = Board.Board()
         for file in range(8):
             for rank in range(8):
                 state.board[file][rank].piece = PieceEnum.pawn

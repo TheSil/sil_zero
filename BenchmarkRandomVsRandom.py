@@ -1,7 +1,6 @@
-from chess_backend.ChessRulesDefault import ChessRulesDefault
+from chess_backend.GameState import GameState
 from chess_backend.common import PlayerEnum
 from agents.RandomAiAgent import RandomAiAgent
-from chess_backend.ChessGame import ChessGame
 
 
 def main(do_print=True):
@@ -15,21 +14,18 @@ def main(do_print=True):
     all = 0
     while True:
 
-        rules = ChessRulesDefault()
-        game = ChessGame(rules)
+        game = GameState()
         game.start_new()
 
         idx = 1
         while game.state == game.RUNNING:
 
-            legal_moves = rules.legal_moves
-            if game.rules.state.turn == PlayerEnum.white:
-                selected = white.select_action(game.rules.state, legal_moves)
+            if game.board.turn == PlayerEnum.white:
+                selected = white.select_action(game)
             else:
-                selected = black.select_action(game.rules.state, legal_moves)
+                selected = black.select_action(game)
 
-            action = legal_moves[selected]
-            game.move(selected)
+            game.apply(selected)
             idx += 1
 
         if game.state == game.WHITE_WON:

@@ -1,9 +1,9 @@
 class HumanConsoleAgent:
-    def select_action(self, state, actions):
+    def select_action(self, game_state):
         while True:
             i = 0
             try:
-                for move in actions:
+                for move in game_state.legal_moves:
                     promote_hint = move.promote_piece.name if move.promote_piece is not None else ''
                     if move.claim_draw:
                         print(
@@ -19,9 +19,9 @@ class HumanConsoleAgent:
                         print("")
                 print("")
                 num = int(input("Choice: "))
-                if not (0 <= num < len(actions)):
+                if not (0 <= num < len(game_state.legal_moves)):
                     raise IndexError
-                return num
+                return game_state.legal_moves[num]
             except ValueError:
                 print("Input in incorrect form")
             except IndexError:

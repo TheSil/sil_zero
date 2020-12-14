@@ -7,7 +7,7 @@ class PositionState:
         return f"{self.piece.name} ({self.player.name})"
 
 
-class BoardState:
+class Board:
     def __init__(self):
         self.clear_board()
 

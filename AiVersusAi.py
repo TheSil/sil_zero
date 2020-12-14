@@ -1,15 +1,22 @@
 from chess_backend.GameState import GameState
 from chess_backend.common import PlayerEnum
-from agents.RandomAiAgent import RandomAiAgent
+from agents.AiAgent import AiAgent
 from ui.console import ConsoleUi
+from random import random
 
+
+class DummyNetwork:
+
+    def __call__(self, game_state):
+        return [random() for _ in game_state.legal_moves], 0.5
 
 def main(do_print=True):
-    game = GameState()
+    game= GameState()
     game.start_new()
 
-    white = RandomAiAgent(prefer_takes=True)
-    black = RandomAiAgent(prefer_takes=True)
+    net = DummyNetwork()
+    white = AiAgent(net)
+    black = AiAgent(net)
     ui = ConsoleUi()
 
     idx = 1

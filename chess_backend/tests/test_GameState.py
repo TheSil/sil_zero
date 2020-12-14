@@ -1,14 +1,14 @@
 import unittest
 from chess_backend.common import Position, POS, PlayerEnum, PieceEnum, IllegalMoveException
-from chess_backend.ChessRulesDefault import ChessRulesDefault, ActionMove
+from chess_backend.GameState import GameState, ActionMove
 
 
 def prepare_board(config, turn):
-    rules = ChessRulesDefault()
+    rules = GameState()
     for pos, (player, piece) in config.items():
-        rules.state.board[pos.file][pos.rank].player = player
-        rules.state.board[pos.file][pos.rank].piece = piece
-    rules.state.turn = turn
+        rules.board.board[pos.file][pos.rank].player = player
+        rules.board.board[pos.file][pos.rank].piece = piece
+    rules.board.turn = turn
     rules.update_legal_moves()
     return rules
 
@@ -21,7 +21,7 @@ def check_move_is_allowed(self,
                           **kwargs):
     rules = board
 
-    rules.move(ActionMove(move_from, move_to, **kwargs))
+    rules.apply(ActionMove(move_from, move_to, **kwargs))
 
     for file in range(8):
         for rank in range(8):
@@ -29,8 +29,8 @@ def check_move_is_allowed(self,
             pos = Position(file, rank)
             if pos in after_config_expected:
                 player, piece = after_config_expected[pos]
-            self.assertEqual(player, rules.state.board[file][rank].player)
-            self.assertEqual(piece, rules.state.board[file][rank].piece)
+            self.assertEqual(player, rules.board.board[file][rank].player)
+            self.assertEqual(piece, rules.board.board[file][rank].piece)
 
 
 def check_move_is_illegal(self,
@@ -40,43 +40,43 @@ def check_move_is_illegal(self,
     rules = board
 
     with self.assertRaises(IllegalMoveException):
-        rules.move(ActionMove(move_from, move_to))
+        rules.apply(ActionMove(move_from, move_to))
 
 
 class SetupTests(unittest.TestCase):
 
     def test_setup(self):
-        rules = ChessRulesDefault()
+        rules = GameState()
         rules.setup_board()
         self.assertEqual(None, rules.last_move_double_file)
         self.assertEqual(True, rules.specific[PlayerEnum.white].can_castle_queen_side)
         self.assertEqual(True, rules.specific[PlayerEnum.white].can_castle_king_side)
         self.assertEqual(True, rules.specific[PlayerEnum.black].can_castle_queen_side)
         self.assertEqual(True, rules.specific[PlayerEnum.black].can_castle_king_side)
-        self.assertEqual(PlayerEnum.white, rules.state.turn)
+        self.assertEqual(PlayerEnum.white, rules.board.turn)
 
         for rank in range(8):
             for file in range(8):
                 if rank < 2:
-                    self.assertEqual(PlayerEnum.white, rules.state.board[file][rank].player)
+                    self.assertEqual(PlayerEnum.white, rules.board.board[file][rank].player)
                 elif rank < 6:
-                    self.assertEqual(None, rules.state.board[file][rank].player)
+                    self.assertEqual(None, rules.board.board[file][rank].player)
                 else:
-                    self.assertEqual(PlayerEnum.black, rules.state.board[file][rank].player)
+                    self.assertEqual(PlayerEnum.black, rules.board.board[file][rank].player)
 
         for rank in (1, 6):
             for file in range(8):
-                self.assertEqual(PieceEnum.pawn, rules.state.board[file][rank].piece)
+                self.assertEqual(PieceEnum.pawn, rules.board.board[file][rank].piece)
 
         for rank in (0, 7):
-            self.assertEqual(PieceEnum.rook, rules.state.board[0][rank].piece)
-            self.assertEqual(PieceEnum.knight, rules.state.board[1][rank].piece)
-            self.assertEqual(PieceEnum.bishop, rules.state.board[2][rank].piece)
-            self.assertEqual(PieceEnum.queen, rules.state.board[3][rank].piece)
-            self.assertEqual(PieceEnum.king, rules.state.board[4][rank].piece)
-            self.assertEqual(PieceEnum.bishop, rules.state.board[5][rank].piece)
-            self.assertEqual(PieceEnum.knight, rules.state.board[6][rank].piece)
-            self.assertEqual(PieceEnum.rook, rules.state.board[7][rank].piece)
+            self.assertEqual(PieceEnum.rook, rules.board.board[0][rank].piece)
+            self.assertEqual(PieceEnum.knight, rules.board.board[1][rank].piece)
+            self.assertEqual(PieceEnum.bishop, rules.board.board[2][rank].piece)
+            self.assertEqual(PieceEnum.queen, rules.board.board[3][rank].piece)
+            self.assertEqual(PieceEnum.king, rules.board.board[4][rank].piece)
+            self.assertEqual(PieceEnum.bishop, rules.board.board[5][rank].piece)
+            self.assertEqual(PieceEnum.knight, rules.board.board[6][rank].piece)
+            self.assertEqual(PieceEnum.rook, rules.board.board[7][rank].piece)
 
 
 class WhitePawnMoveTests(unittest.TestCase):
@@ -176,14 +176,14 @@ class WhitePawnPromotionTests(unittest.TestCase):
                 turn=PlayerEnum.white
             )
 
-            board.move(ActionMove(pos_from=POS("a7"),
-                       pos_to=POS("a8"),
-                       promote_piece=promoted_piece))
+            board.apply(ActionMove(pos_from=POS("a7"),
+                                   pos_to=POS("a8"),
+                                   promote_piece=promoted_piece))
 
-            self.assertEqual(None, board.state.board[0][6].piece)
-            self.assertEqual(None, board.state.board[0][6].player)
-            self.assertEqual(promoted_piece, board.state.board[0][7].piece)
-            self.assertEqual(PlayerEnum.white, board.state.board[0][7].player)
+            self.assertEqual(None, board.board.board[0][6].piece)
+            self.assertEqual(None, board.board.board[0][6].player)
+            self.assertEqual(promoted_piece, board.board.board[0][7].piece)
+            self.assertEqual(PlayerEnum.white, board.board.board[0][7].player)
 
     def test_promote_blocked_illegal(self):
         for promoted_piece in (PieceEnum.queen, PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook):
@@ -195,9 +195,9 @@ class WhitePawnPromotionTests(unittest.TestCase):
             )
 
             with self.assertRaises(IllegalMoveException):
-                board.move(ActionMove(pos_from=POS("a7"),
-                           pos_to=POS("a8"),
-                           promote_piece=promoted_piece))
+                board.apply(ActionMove(pos_from=POS("a7"),
+                                       pos_to=POS("a8"),
+                                       promote_piece=promoted_piece))
 
     def test_promote_causing_check_illegal(self):
         for promoted_piece in (PieceEnum.queen, PieceEnum.knight, PieceEnum.bishop, PieceEnum.rook):
@@ -210,9 +210,9 @@ class WhitePawnPromotionTests(unittest.TestCase):
             )
 
             with self.assertRaises(IllegalMoveException):
-                board.move(ActionMove(pos_from=POS("e7"),
-                           pos_to=POS("e8"),
-                           promote_piece=promoted_piece))
+                board.apply(ActionMove(pos_from=POS("e7"),
+                                       pos_to=POS("e8"),
+                                       promote_piece=promoted_piece))
 
     def test_promote_by_taking(self):
         board = prepare_board(config={
@@ -536,7 +536,7 @@ class WhiteKingQueenSideCastlingTests(unittest.TestCase):
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
 
-        board.move(ActionMove(POS("a2"), POS("a3")))
+        board.apply(ActionMove(POS("a2"), POS("a3")))
 
         self.assertEqual(True, board.specific[PlayerEnum.white].can_castle_queen_side)
 
@@ -547,7 +547,7 @@ class WhiteKingQueenSideCastlingTests(unittest.TestCase):
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
-        board.move(ActionMove(POS("a1"), POS("a2")))
+        board.apply(ActionMove(POS("a1"), POS("a2")))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_queen_side)
 
@@ -558,7 +558,7 @@ class WhiteKingQueenSideCastlingTests(unittest.TestCase):
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_queen_side = True
-        board.move(ActionMove(POS("e1"), POS("e2")))
+        board.apply(ActionMove(POS("e1"), POS("e2")))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_queen_side)
 
@@ -701,7 +701,7 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
 
-        board.move(ActionMove(POS("a2"), POS("a3")))
+        board.apply(ActionMove(POS("a2"), POS("a3")))
 
         self.assertEqual(True, board.specific[PlayerEnum.white].can_castle_king_side)
 
@@ -712,7 +712,7 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
-        board.move(ActionMove(POS("h1"), POS("h2")))
+        board.apply(ActionMove(POS("h1"), POS("h2")))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_king_side)
 
@@ -723,7 +723,7 @@ class WhiteKingKingSideCastlingTests(unittest.TestCase):
         },
             turn=PlayerEnum.white)
         board.specific[PlayerEnum.white].can_castle_king_side = True
-        board.move(ActionMove(POS("e1"), POS("e2")))
+        board.apply(ActionMove(POS("e1"), POS("e2")))
 
         self.assertEqual(False, board.specific[PlayerEnum.white].can_castle_king_side)
 
@@ -884,8 +884,8 @@ class FiftyMovesRuleTests(unittest.TestCase):
         white_pos1, white_pos2 = POS("a1"), POS("b1")
         black_pos1, black_pos2 = POS("a8"), POS("b8")
         for _ in range(49): # 49 moves don't take/move pawn
-            board.move(ActionMove(white_pos1, white_pos2))
-            board.move(ActionMove(black_pos1, black_pos2))
+            board.apply(ActionMove(white_pos1, white_pos2))
+            board.apply(ActionMove(black_pos1, black_pos2))
 
             white_pos1, white_pos2 = white_pos2, white_pos1
             black_pos1, black_pos2 = black_pos2, black_pos1
@@ -893,11 +893,11 @@ class FiftyMovesRuleTests(unittest.TestCase):
         self.assertNotIn(ActionMove(pos_from=None,pos_to=None, claim_draw=True), board.legal_moves)
 
         # white does his 50th move, then the draw should be possible for black
-        board.move(ActionMove(white_pos1, white_pos2))
+        board.apply(ActionMove(white_pos1, white_pos2))
         self.assertIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
 
         # after both made their 50th moves, it should be possible for white as well
-        board.move(ActionMove(black_pos1, black_pos2))
+        board.apply(ActionMove(black_pos1, black_pos2))
         self.assertIn(ActionMove(pos_from=None,pos_to=None, claim_draw=True), board.legal_moves)
 
     def test_fifty_moves_rest_by_pawn_move(self):
@@ -912,24 +912,24 @@ class FiftyMovesRuleTests(unittest.TestCase):
         white_pos1, white_pos2 = POS("a1"), POS("b1")
         black_pos1, black_pos2 = POS("a8"), POS("b8")
         for _ in range(48): # 48 moves don't take/move pawn
-            board.move(ActionMove(white_pos1, white_pos2))
-            board.move(ActionMove(black_pos1, black_pos2))
+            board.apply(ActionMove(white_pos1, white_pos2))
+            board.apply(ActionMove(black_pos1, black_pos2))
 
             white_pos1, white_pos2 = white_pos2, white_pos1
             black_pos1, black_pos2 = black_pos2, black_pos1
 
         # 49th move are just pawns
-        board.move(ActionMove(POS("h2"), POS("h3")))
+        board.apply(ActionMove(POS("h2"), POS("h3")))
         self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
-        board.move(ActionMove(POS("h7"), POS("h6")))
+        board.apply(ActionMove(POS("h7"), POS("h6")))
 
         # pawns should break the counter, draw should not be possible
         self.assertNotIn(ActionMove(pos_from=None,pos_to=None,claim_draw=True), board.legal_moves)
 
         # not even after another 49 moves!
         for _ in range(49):
-            board.move(ActionMove(white_pos1, white_pos2))
-            board.move(ActionMove(black_pos1, black_pos2))
+            board.apply(ActionMove(white_pos1, white_pos2))
+            board.apply(ActionMove(black_pos1, black_pos2))
 
             white_pos1, white_pos2 = white_pos2, white_pos1
             black_pos1, black_pos2 = black_pos2, black_pos1
@@ -949,21 +949,21 @@ class FiftyMovesRuleTests(unittest.TestCase):
         white_pos1, white_pos2 = POS("a1"), POS("b1")
         black_pos1, black_pos2 = POS("a8"), POS("b8")
         for _ in range(48): # 48 moves don't take/move pawn
-            board.move(ActionMove(white_pos1, white_pos2))
-            board.move(ActionMove(black_pos1, black_pos2))
+            board.apply(ActionMove(white_pos1, white_pos2))
+            board.apply(ActionMove(black_pos1, black_pos2))
 
             white_pos1, white_pos2 = white_pos2, white_pos1
             black_pos1, black_pos2 = black_pos2, black_pos1
 
         # 49th move are rooks taking
-        board.move(ActionMove(POS("h2"), POS("h3"), to_take=POS("h3")))
-        board.move(ActionMove(POS("h4"), POS("h3"), to_take=POS("h3")))
+        board.apply(ActionMove(POS("h2"), POS("h3"), to_take=POS("h3")))
+        board.apply(ActionMove(POS("h4"), POS("h3"), to_take=POS("h3")))
         self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
 
         # not even after another 49 moves!
         for _ in range(49):
-            board.move(ActionMove(white_pos1, white_pos2))
-            board.move(ActionMove(black_pos1, black_pos2))
+            board.apply(ActionMove(white_pos1, white_pos2))
+            board.apply(ActionMove(black_pos1, black_pos2))
 
             white_pos1, white_pos2 = white_pos2, white_pos1
             black_pos1, black_pos2 = black_pos2, black_pos1
@@ -981,20 +981,20 @@ class FiftyMovesRuleTests(unittest.TestCase):
         white_pos1, white_pos2 = POS("a1"), POS("b1")
         black_pos1, black_pos2 = POS("a8"), POS("b8")
         for _ in range(49): # 49 moves don't take/move pawn
-            board.move(ActionMove(white_pos1, white_pos2))
-            board.move(ActionMove(black_pos1, black_pos2))
+            board.apply(ActionMove(white_pos1, white_pos2))
+            board.apply(ActionMove(black_pos1, black_pos2))
 
             white_pos1, white_pos2 = white_pos2, white_pos1
             black_pos1, black_pos2 = black_pos2, black_pos1
 
         # first 50th move white moves queen next to black king, forcing only take moves
-        board.move(ActionMove(POS("h7"), POS("b7")))
+        board.apply(ActionMove(POS("h7"), POS("b7")))
 
         # black's only option is to take, so he cannot claim a draw as his 50th move will be take
         self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
 
         # black takes, and moves counter rest, so draw not possible for white
-        board.move(ActionMove(black_pos1, POS("b7"), to_take=POS("b7")))
+        board.apply(ActionMove(black_pos1, POS("b7"), to_take=POS("b7")))
         self.assertNotIn(ActionMove(pos_from=None, pos_to=None, claim_draw=True), board.legal_moves)
 
 

@@ -5,16 +5,16 @@ class RandomAiAgent:
     def __init__(self, prefer_takes=False):
         self.prefer_takes = prefer_takes
 
-    def select_action(self, state, actions):
+    def select_action(self, game_state):
         if not self.prefer_takes:
-            return random.randint(0, len(actions) - 1)
+            return random.choice(game_state.legal_moves)
 
         preferred_idx = []
-        for idx, action in enumerate(actions):
+        for idx, action in enumerate(game_state.legal_moves):
             if action.to_take is not None:
                 preferred_idx.append(idx)
 
         if preferred_idx:
-            return preferred_idx[random.randint(0, len(preferred_idx) - 1)]
+            return game_state.legal_moves[random.choice(preferred_idx)]
 
-        return random.randint(0, len(actions) - 1)
+        return random.choice(game_state.legal_moves)
