@@ -34,7 +34,6 @@ def mcts_search(game_state, policy_value_network, config=DefaultConfig()):
 
     # select action with the most visit counts
     selected = max(((action, node)
-                for action, node in root.children.items()),
-                key=lambda x: x[1].visit_count)
+                    for action, node in root.children.items()),
+                   key=lambda x: x[1].visit_count)
     return selected[0]
-

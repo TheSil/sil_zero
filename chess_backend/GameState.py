@@ -1,6 +1,7 @@
-from chess_backend.common import PieceEnum, PlayerEnum, Position, IllegalMoveException
-from chess_backend.Board import Board
 import copy
+
+from chess_backend.Board import Board
+from chess_backend.common import PieceEnum, PlayerEnum, Position, IllegalMoveException
 
 
 class ActionMove:
@@ -40,9 +41,9 @@ class ActionMove:
                self.__dict__ == other.__dict__
 
     def __hash__(self):
-        return hash(str(self.move_from)+\
-               str(self.move_to)+\
-               str(self.to_take))
+        return hash(str(self.move_from) +
+                    str(self.move_to) +
+                    str(self.to_take))
 
     def apply(self, state, cache=None):
 
@@ -143,6 +144,7 @@ class ActionMove:
         state.specific[state.board.turn].can_castle_king_side = cache.can_castle_king_side
         state.specific[state.board.turn].can_castle_queen_side = cache.can_castle_queen_side
 
+
 only_king = {
     PieceEnum.pawn: 0,
     PieceEnum.rook: 0,
@@ -167,6 +169,7 @@ king_knight = {
     PieceEnum.queen: 0,
     PieceEnum.king: 1
 }
+
 
 class GameState:
     NOT_STARTED = 0
@@ -358,10 +361,10 @@ class GameState:
         self.legal_moves = self.__get_all_legal_moves()
 
     def add_non_movement_legal_actions(self, moves):
-        if self.move_without_take_and_pawn_move > 2*50:
+        if self.move_without_take_and_pawn_move > 2 * 50:
             # there have been 50 moves without take or pawn move already
             moves.append(ActionMove(pos_from=None, pos_to=None, claim_draw=True))
-        elif self.move_without_take_and_pawn_move > 2*49:
+        elif self.move_without_take_and_pawn_move > 2 * 49:
             # we are about to make 50th move without take or pawn move
             for move in moves:
                 if move.to_take is None and \
@@ -378,7 +381,7 @@ class GameState:
         if piece == PieceEnum.pawn:
             direction = 1 if player == PlayerEnum.white else -1
             return target.rank == source.rank + direction and \
-                   (target.file == source.file + 1 or target.file == source.file - 1)
+                (target.file == source.file + 1 or target.file == source.file - 1)
         elif piece == PieceEnum.knight:
             dx = target.file - source.file
             dy = target.rank - source.rank

@@ -1,8 +1,8 @@
-from chess_backend.GameState import GameState
-from chess_backend.common import PlayerEnum
-from agents.AiAgent import AiAgent
-from ui.console import ConsoleUi
 from random import random
+
+from agents.AiAgent import AiAgent
+from chess_backend.GameState import GameState
+from ui.console import ConsoleUi
 
 
 class DummyNetwork:
@@ -10,23 +10,18 @@ class DummyNetwork:
     def __call__(self, game_state):
         return [random() for _ in game_state.legal_moves], 0.5
 
+
 def main(do_print=True):
-    game= GameState()
+    game = GameState()
     game.start_new()
 
     net = DummyNetwork()
-    white = AiAgent(net)
-    black = AiAgent(net)
+    agent = AiAgent(net)
     ui = ConsoleUi()
 
     idx = 1
     while game.state == game.RUNNING:
-
-        if game.board.turn == PlayerEnum.white:
-            selected = white.select_action(game)
-        else:
-            selected = black.select_action(game)
-
+        selected = agent.select_action(game)
         game.apply(selected)
         if do_print:
             ui.draw_board(game.board)
