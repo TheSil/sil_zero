@@ -3,12 +3,16 @@ from random import random
 from agents.AiAgent import AiAgent
 from chess_backend.GameState import GameState
 from ui.console import ConsoleUi
+import numpy as np
 
 
 class DummyNetwork:
 
     def __call__(self, game_state):
-        return [random() for _ in game_state.legal_moves], 0.5
+        count = len(game_state.legal_moves)
+        policy = [1/count] * count
+        value = 0
+        return policy, value
 
 
 def main(do_print=True):

@@ -1,11 +1,12 @@
 from mcts.MctsNode import MctsNode
 from mcts.UcbSelectPolicy import UcbSelectPolicy
+import random
 
 
 class DefaultConfig:
 
     def __init__(self):
-        self.leaf_iterations = 800
+        self.leaf_iterations = 100 # 800
         self.c_init = 1.25
         self.c_base = 19652
 
@@ -23,9 +24,13 @@ def mcts_search(game_state, policy_value_network, config=DefaultConfig()):
             node = child_node
 
         # reached the leaf node, expand
-        policy, value = policy_value_network(sim_game_state)
-        for action_idx, action in enumerate(sim_game_state.legal_moves):
-            node.children[action] = MctsNode(node, policy[action_idx])
+        if sim_game_state.legal_moves:
+            policy, value = policy_value_network(sim_game_state)
+            for action_idx, action in enumerate(sim_game_state.legal_moves):
+                node.children[action] = MctsNode(node, policy[action_idx])
+        else: # no more moves, terminal state -> propagate actual value
+            value = sim_game_state.get_winner_score()
+            value *= -node.player_turn # we are winners only if this is not our turn
 
         # propagate value back to the root
         while node:
@@ -33,7 +38,11 @@ def mcts_search(game_state, policy_value_network, config=DefaultConfig()):
             node = node.parent
 
     # select action with the most visit counts
-    selected = max(((action, node)
-                    for action, node in root.children.items()),
-                   key=lambda x: x[1].visit_count)
-    return selected[0]
+    population = []
+    weights = []
+    for action, node in root.children.items():
+        population.append(action)
+        weights.append(node.visit_count)
+    # softmax?
+    selected_action, = random.choices(population, weights)
+    return selected_action

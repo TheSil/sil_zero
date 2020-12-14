@@ -375,6 +375,11 @@ class GameState:
     def clone(self):
         return copy.deepcopy(self)
 
+    def get_winner_score(self):
+        if self.state in (self.DRAW, self.STALEMATE):
+            return 0
+        return 1
+
     def __threats(self, source, target):
         player = self.board.board[source.file][source.rank].player
         piece = self.board.board[source.file][source.rank].piece
