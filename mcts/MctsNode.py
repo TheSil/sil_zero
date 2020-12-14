@@ -1,10 +1,11 @@
 
 class MctsNode:
 
-    def __init__(self, parent=None, prior_probability=0):
+    def __init__(self, game_state=None, parent=None, prior_probability=0 ):
         self.parent = parent
         self.children = {}
         self.player_turn = 1 if parent is None else -parent.player_turn
+        self.game_state = game_state
 
         self.visit_count = 0  # N(s,a)
         self.total_action_value = 0  # W(s,a)

@@ -6,30 +6,31 @@ import random
 class DefaultConfig:
 
     def __init__(self):
-        self.leaf_iterations = 100 # 800
+        self.leaf_iterations = 800 # 800
         self.c_init = 1.25
         self.c_base = 19652
 
 
 def mcts_search(game_state, policy_value_network, config=DefaultConfig()):
-    root = MctsNode()
+    root = MctsNode(game_state=game_state)
     select_policy = UcbSelectPolicy(config.c_init, config.c_base)
 
     for _ in range(config.leaf_iterations + 1):
         node = root
-        sim_game_state = game_state.clone()
         while node.is_expanded():
             action, child_node = select_policy.select_child(node)
-            sim_game_state.apply(action)
             node = child_node
+            if node.game_state is None:
+                node.game_state = node.parent.game_state.clone()
+                node.game_state.apply(action)
 
         # reached the leaf node, expand
-        if sim_game_state.legal_moves:
-            policy, value = policy_value_network(sim_game_state)
-            for action_idx, action in enumerate(sim_game_state.legal_moves):
-                node.children[action] = MctsNode(node, policy[action_idx])
+        if node.game_state.legal_moves:
+            policy, value = policy_value_network(node.game_state)
+            for action_idx, action in enumerate(node.game_state.legal_moves):
+                node.children[action] = MctsNode(parent=node, prior_probability=policy[action_idx])
         else: # no more moves, terminal state -> propagate actual value
-            value = sim_game_state.get_winner_score()
+            value = node.game_state.get_winner_score()
             value *= -node.player_turn # we are winners only if this is not our turn
 
         # propagate value back to the root
