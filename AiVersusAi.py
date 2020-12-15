@@ -1,10 +1,7 @@
-from random import random
-
 from agents.AiAgent import AiAgent
 from chess_backend.GameState import GameState
+from chess_backend.Session import Session
 from ui.console import ConsoleUi
-import numpy as np
-
 
 class DummyNetwork:
 
@@ -23,14 +20,9 @@ def main(do_print=True):
     agent = AiAgent(net)
     ui = ConsoleUi()
 
-    idx = 1
-    while game.state == game.RUNNING:
-        selected = agent.select_action(game)
-        game.apply(selected)
-        if do_print:
-            ui.draw_board(game.board)
-
-        idx += 1
+    session = Session(game, agent, agent)
+    session.before_move(lambda : ui.draw_board(game.board))
+    session.play()
 
     if do_print:
         if game.state == game.WHITE_WON:

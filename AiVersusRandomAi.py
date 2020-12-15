@@ -1,11 +1,8 @@
-from random import random
-
 from agents.AiAgent import AiAgent
 from agents.RandomAiAgent import RandomAiAgent
 from chess_backend.GameState import GameState
+from chess_backend.Session import Session
 from ui.console import ConsoleUi
-from chess_backend.common import PlayerEnum, PieceEnum, POS
-import numpy as np
 
 
 class DummyNetwork:
@@ -48,18 +45,9 @@ def main(do_print=True):
     black = AiAgent(net)
     ui = ConsoleUi()
 
-    idx = 1
-    while game.state == game.RUNNING:
-        if game.board.turn == PlayerEnum.white:
-            selected = white.select_action(game)
-        else:
-            selected = black.select_action(game)
-
-        game.apply(selected)
-        if do_print:
-            ui.draw_board(game.board)
-
-        idx += 1
+    session = Session(game, white, black)
+    session.before_move(lambda : ui.draw_board(game.board))
+    session.play()
 
     if do_print:
         if game.state == game.WHITE_WON:

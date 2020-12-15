@@ -231,6 +231,9 @@ class GameState:
         self.legal_moves = []
         self.state = self.NOT_STARTED
 
+    def is_running(self):
+        return self.state == self.RUNNING
+
     def start_new(self):
         self.setup_board()
         self.state = self.RUNNING

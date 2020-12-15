@@ -54,23 +54,22 @@ def mcts_search(game_state, policy_value_network, config=DefaultConfig()):
     weights = np.exp(weights - np.max(weights))
     weights /= weights.sum(axis=0)
 
-    i = 0
-    for idx in range(len(population)):
-        move = population[idx]
-        promote_hint = move.promote_piece.name if move.promote_piece is not None else ''
-        if move.claim_draw:
-            print(
-                f"claim draw \t\t",
-                end='')
-        else:
-            print(
-                f"{move.move_from} -> {move.move_to} {promote_hint}: {weights[idx]:.3f}\t\t",
-                end='')
-        i += 1
-        if i % 3 == 0:
-            print("")
-    print("")
-
+    #i = 0
+    #for idx in range(len(population)):
+    #    move = population[idx]
+    #    promote_hint = move.promote_piece.name if move.promote_piece is not None else ''
+    #    if move.claim_draw:
+    #        print(
+    #            f"claim draw \t\t",
+    #            end='')
+    #    else:
+    #        print(
+    #            f"{move.move_from} -> {move.move_to} {promote_hint}: {weights[idx]:.3f}\t\t",
+    #            end='')
+    #    i += 1
+    #    if i % 3 == 0:
+    #        print("")
+    #print("")
 
     selected_action, = random.choices(population, weights)
     return selected_action

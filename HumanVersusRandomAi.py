@@ -1,5 +1,6 @@
 from chess_backend.GameState import GameState
 from chess_backend.common import PlayerEnum
+from chess_backend.Session import Session
 from agents.HumanConsoleAgent import HumanConsoleAgent
 from agents.RandomAiAgent import RandomAiAgent
 from ui.console import ConsoleUi
@@ -13,23 +14,18 @@ if __name__ == '__main__':
     black = RandomAiAgent()
     ui = ConsoleUi()
 
-    idx = 1
-    ui.draw_board(game.board)
-    while game.state == game.RUNNING:
+    session = Session(game, white, black)
+    session.before_move(lambda : ui.draw_board(game.board))
 
-        if game.board.turn == PlayerEnum.white:
-            selected = white.select_action(game)
+    def report_move():
+        last_move = session.history[-1][1]
+        if last_move.claim_draw:
+            print(f"move chosen: claim draw")
         else:
-            selected = black.select_action(game)
+            print(f"move chosen: {last_move.move_from} -> {last_move.move_to}")
+    session.after_move(report_move)
 
-        game.apply(selected)
-        ui.draw_board(game.board)
-        if selected.claim_draw:
-            print(f"{idx}. move chosen: claim draw")
-        else:
-            print(f"{idx}. move chosen: {selected.move_from} -> {selected.move_to}")
-
-        idx += 1
+    session.play()
 
     if game.state == game.WHITE_WON:
         print(f"Game finished, white won")

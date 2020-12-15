@@ -1,11 +1,20 @@
 from chess_backend.GameState import GameState
 from chess_backend.common import PlayerEnum
 from agents.RandomAiAgent import RandomAiAgent
+from agents.AiAgent import AiAgent
 
+class DummyNetwork:
+
+    def __call__(self, game_state):
+        count = len(game_state.legal_moves)
+        policy = [1/count] * count
+        value = 0
+        return policy, value
 
 def main(do_print=True):
-    white = RandomAiAgent(prefer_takes=True)
-    black = RandomAiAgent(prefer_takes=True)
+    net = DummyNetwork()
+    white = RandomAiAgent()
+    black = AiAgent(net)
 
     game_number = 1
     white_wins = 0
