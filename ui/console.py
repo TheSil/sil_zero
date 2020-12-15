@@ -9,7 +9,7 @@ class ConsoleUi:
             init(convert=True)
 
     def draw_board(self, board, colors=True):
-        os.system('cls')
+        #os.system('cls')
         ret = ""
         space = " "
 

@@ -1,6 +1,7 @@
 from mcts.MctsNode import MctsNode
 from mcts.UcbSelectPolicy import UcbSelectPolicy
 import random
+import numpy as np
 
 
 class DefaultConfig:
@@ -44,6 +45,9 @@ def mcts_search(game_state, policy_value_network, config=DefaultConfig()):
     for action, node in root.children.items():
         population.append(action)
         weights.append(node.visit_count)
-    # softmax?
+    # softmax
+    weights = np.exp(weights)
+    weights = weights / np.sum(weights, axis=0)
+    print(weights)
     selected_action, = random.choices(population, weights)
     return selected_action

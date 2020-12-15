@@ -9,7 +9,6 @@ TODO in AI:
  - propagate training data from self-play
  - connect to actual neural network
  - add exploration noise
- - shall we use softmax for move selection?
 
 To play with the repository, you just need to have Python 3 installed. Download this repository and go to its root folder. 
 
