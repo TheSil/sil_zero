@@ -7,7 +7,7 @@ class RandomAiAgent:
 
     def select_action(self, game_state):
         if not self.prefer_takes:
-            return random.choice(game_state.legal_moves)
+            return random.choice(game_state.legal_moves), None
 
         preferred_idx = []
         for idx, action in enumerate(game_state.legal_moves):
@@ -15,6 +15,6 @@ class RandomAiAgent:
                 preferred_idx.append(idx)
 
         if preferred_idx:
-            return game_state.legal_moves[random.choice(preferred_idx)]
+            return game_state.legal_moves[random.choice(preferred_idx)], None
 
-        return random.choice(game_state.legal_moves)
+        return random.choice(game_state.legal_moves), None

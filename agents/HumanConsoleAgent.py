@@ -21,7 +21,7 @@ class HumanConsoleAgent:
                 num = int(input("Choice: "))
                 if not (0 <= num < len(game_state.legal_moves)):
                     raise IndexError
-                return game_state.legal_moves[num]
+                return game_state.legal_moves[num], None
             except ValueError:
                 print("Input in incorrect form")
             except IndexError:

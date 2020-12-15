@@ -6,7 +6,6 @@ TODO in chess backend:
  - threefold repetition
 
 TODO in AI:
- - propagate training data from self-play
  - connect to actual neural network
  - add exploration noise
 

@@ -72,4 +72,4 @@ def mcts_search(game_state, policy_value_network, config=DefaultConfig()):
     #print("")
 
     selected_action, = random.choices(population, weights)
-    return selected_action
+    return selected_action, root
