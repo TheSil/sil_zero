@@ -13,7 +13,7 @@ def main(do_print=True):
     ui = ConsoleUi()
 
     session = Session(game, white, black)
-    session.before_move(lambda : ui.draw_board(game.board))
+    session.before_move(lambda: ui.draw_board(game.board))
     session.play()
 
     if do_print:

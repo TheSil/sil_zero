@@ -1,5 +1,4 @@
 from chess_backend.GameState import GameState
-from chess_backend.common import PlayerEnum
 from chess_backend.Session import Session
 from agents.HumanConsoleAgent import HumanConsoleAgent
 from agents.RandomAiAgent import RandomAiAgent
@@ -15,7 +14,7 @@ if __name__ == '__main__':
     ui = ConsoleUi()
 
     session = Session(game, white, black)
-    session.before_move(lambda : ui.draw_board(game.board))
+    session.before_move(lambda: ui.draw_board(game.board))
 
     def report_move():
         last_move = session.history[-1][1]

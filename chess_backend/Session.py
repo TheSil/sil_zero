@@ -30,5 +30,3 @@ class Session:
 
     def after_move(self, callback):
         self.on_move_after.append(callback)
-
-

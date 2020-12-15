@@ -7,7 +7,6 @@ TODO in chess backend:
 
 TODO in AI:
  - connect to actual neural network
- - add exploration noise
 
 Some notable modifications:
  - game states are remembered in search tree nodes to speed up the traversion (each game move is applied exactly once per leaf)

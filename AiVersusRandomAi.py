@@ -9,7 +9,7 @@ class DummyNetwork:
 
     def __call__(self, game_state):
         count = len(game_state.legal_moves)
-        policy = [1/count] * count
+        policy = [1 / count] * count
         value = 0
         return policy, value
 
@@ -19,26 +19,25 @@ def main(do_print=True):
     game.start_new()
 
     # setup custom position
-    '''
-    game.board.clear_board()
-    custom_white = {POS("a6"): PieceEnum.pawn,
-                    POS("h1"): PieceEnum.king}
-    custom_black = {POS("e1"): PieceEnum.knight,
-                    POS("h2"): PieceEnum.pawn,
-                    POS("h3"): PieceEnum.king}
-    for pos, piece in custom_white.items():
-        game.board.board[pos.file][pos.rank].player = PlayerEnum.white
-        game.board.board[pos.file][pos.rank].piece = piece
-    for pos, piece in custom_black.items():
-        game.board.board[pos.file][pos.rank].player = PlayerEnum.black
-        game.board.board[pos.file][pos.rank].piece = piece
-    game.specific[PlayerEnum.white].can_castle_queen_side = False
-    game.specific[PlayerEnum.white].can_castle_king_side = False
-    game.specific[PlayerEnum.black].can_castle_queen_side = False
-    game.specific[PlayerEnum.black].can_castle_king_side = False
-    game.board.turn = PlayerEnum.black
-    game.update_legal_moves()
-    '''
+    # from chess_backend.common import PieceEnum, POS, PlayerEnum
+    # game.board.clear_board()
+    # custom_white = {POS("a6"): PieceEnum.pawn,
+    #                 POS("h1"): PieceEnum.king}
+    # custom_black = {POS("e1"): PieceEnum.knight,
+    #                 POS("h2"): PieceEnum.pawn,
+    #                 POS("h3"): PieceEnum.king}
+    # for pos, piece in custom_white.items():
+    #     game.board.board[pos.file][pos.rank].player = PlayerEnum.white
+    #     game.board.board[pos.file][pos.rank].piece = piece
+    # for pos, piece in custom_black.items():
+    #     game.board.board[pos.file][pos.rank].player = PlayerEnum.black
+    #     game.board.board[pos.file][pos.rank].piece = piece
+    # game.specific[PlayerEnum.white].can_castle_queen_side = False
+    # game.specific[PlayerEnum.white].can_castle_king_side = False
+    # game.specific[PlayerEnum.black].can_castle_queen_side = False
+    # game.specific[PlayerEnum.black].can_castle_king_side = False
+    # game.board.turn = PlayerEnum.black
+    # game.update_legal_moves()
 
     net = DummyNetwork()
     white = RandomAiAgent()
@@ -46,7 +45,7 @@ def main(do_print=True):
     ui = ConsoleUi()
 
     session = Session(game, white, black)
-    session.before_move(lambda : ui.draw_board(game.board))
+    session.before_move(lambda: ui.draw_board(game.board))
     session.play()
 
     if do_print:
